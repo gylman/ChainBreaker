@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 library  Utility {
+    // sorts inplace
     function quickSort(address[] memory arr, int left, int right) internal pure {
         int i = left;
         int j = right;
@@ -22,8 +23,13 @@ library  Utility {
             quickSort(arr, i, right);
     }
 
+    // return sorted copy
     function sort(address[] memory data) internal pure returns (address[] memory) {
-        quickSort(data, int(0), int(data.length - 1));
-        return data;
+        address[] memory sorted = new address[](data.length);
+        for (uint i = 0; i < data.length; i++) {
+            sorted[i] = data[i];
+        }
+        quickSort(sorted, int(0), int(sorted.length - 1));
+        return sorted;
     }
 }
