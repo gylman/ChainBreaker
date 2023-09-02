@@ -82,7 +82,7 @@ function Item({ tx }: { tx: Tx }) {
       <div className="w-full truncate text-lg font-medium">
         {nc ? nc.name : <AddressText className="!justify-start" address={tx.address} />}
       </div>
-      <div className="w-full truncate">Status: {tx.status}</div>
+      <div className="w-full truncate">Status: {tx.status.startsWith("pending") ? "pending" : tx.status}</div>
       <div className="w-full truncate">Amount: ${tx.amount.toString()}</div>
       {tx.description && <div className="w-full truncate">Message: {tx.description}</div>}
     </li>
