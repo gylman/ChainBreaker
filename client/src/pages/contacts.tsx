@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import * as Checkbox from "@radix-ui/react-checkbox";
-import { IconCheck, IconUserPlus } from "@tabler/icons-react";
-import { contacts, title, wallet } from "../../signals";
-import Input from "../../components/Input";
-import Dialog from "../../components/Dialog";
-import Button from "../../components/Button";
-import ProfileImage from "../../components/ProfileImage";
-import AddressText from "../../components/AddressText";
+import { IconCheck, IconUserPlus, IconX } from "@tabler/icons-react";
+import { contacts, title, wallet } from "../signals";
+import Input from "../components/Input";
+import Dialog from "../components/Dialog";
+import Button from "../components/Button";
+import ProfileImage from "../components/ProfileImage";
+import AddressText from "../components/AddressText";
 import { useAtom } from "jotai";
-import { namedContactsAtom, debtClearingAllowedAtom } from "../../states";
-import { showToast } from "../../utils/toast";
-import { cx } from "../../utils/common";
+import { namedContactsAtom, debtClearingAllowedAtom } from "../states";
+import { showToast } from "../utils/toast";
+import { cx } from "../utils/common";
 
 export default function Contacts() {
   const [namedContacts, setNamedContacts] = useAtom(namedContactsAtom);
@@ -24,21 +24,28 @@ export default function Contacts() {
 
   const [query, setQuery] = useState("");
   const filteredContacts = useMemo(() => {
-    return contacts.value.filter((contact) => {
-      const nc = namedContacts.find((nc) => nc.address === contact.address);
+    return [
+      ...contacts.value.filter((contact) => {
+        const nc = namedContacts.find((nc) => nc.address === contact.address);
 
-      if (nc) {
-        return (
-          nc.name.toLocaleLowerCase().includes(query.toLocaleLowerCase()) ||
-          nc.address.toLocaleLowerCase().includes(query.toLocaleLowerCase())
-        );
-      }
+        if (nc) {
+          return (
+            nc.name.toLocaleLowerCase().includes(query.toLocaleLowerCase()) ||
+            nc.address.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+          );
+        }
 
-      return contact.address.toLocaleLowerCase().includes(query.toLocaleLowerCase());
-    });
+        return contact.address.toLocaleLowerCase().includes(query.toLocaleLowerCase());
+      }),
+      ...namedContacts
+        .filter((nc) => !contacts.value.some((c) => c.address === nc.address))
+        .map((nc) => ({
+          address: nc.address,
+          balance: 0,
+        })),
+    ];
   }, [contacts.value, query]);
 
-  // example of a page
   return (
     <>
       <Dialog.Root>
@@ -156,15 +163,54 @@ export default function Contacts() {
                 {/* tags */}
                 <div className="flex w-fit shrink-0 flex-wrap justify-end gap-x-1.5">
                   {balance > 0 && (
-                    <span className="shrink-0 rounded-full border-2 border-gray-800 px-2 text-sm">owes</span>
+                    <span className="shrink-0 rounded-full border-2 border-gray-800 px-2 text-sm">owes you</span>
                   )}
                   {balance < 0 && (
-                    <span className="shrink-0 rounded-full border-2 border-gray-800 px-2 text-sm">is owed</span>
+                    <span className="shrink-0 rounded-full border-2 border-gray-800 px-2 text-sm">lent you</span>
                   )}
                   {/* <span className="shrink-0 rounded-full border-2 border-red-800 bg-red-600 px-2 text-sm text-white">
                   expired
                 </span> */}
                 </div>
+
+                {nc && (
+                  <Dialog.Root>
+                    <Dialog.Trigger>
+                      <Button as="div" className="rounded-full bg-red-500 p-1 text-white">
+                        <IconX size={16} />
+                      </Button>
+                    </Dialog.Trigger>
+                    <Dialog.Content>
+                      <Dialog.Title className="mb-1">Are you sure to delete the contact?</Dialog.Title>
+                      <p>
+                        The contact named <span className="font-display font-bold">{nc.name}</span> is going to be
+                        deleted from your contacts.
+                      </p>
+
+                      <div className="flex justify-between gap-4 pt-4">
+                        <Dialog.Close>
+                          <Button
+                            as="div"
+                            className="w-full rounded-full bg-gray-200 px-4 pb-1.5 pt-2.5 font-display font-bold text-gray-800"
+                          >
+                            Cancel
+                          </Button>
+                        </Dialog.Close>
+                        <Dialog.Close>
+                          <Button
+                            as="div"
+                            onClick={() => {
+                              setNamedContacts((ncs) => ncs.filter((n) => n.address !== nc.address));
+                            }}
+                            className="w-full rounded-full bg-red-700 px-4 pb-1.5 pt-2.5 font-display font-bold text-white"
+                          >
+                            Delete
+                          </Button>
+                        </Dialog.Close>
+                      </div>
+                    </Dialog.Content>
+                  </Dialog.Root>
+                )}
               </li>
             );
           })}

@@ -77,6 +77,7 @@ export default function PendingTransaction() {
                     updateContacts();
                     showToast("Transaction successfully confirmed!");
                   }}
+                  type="button"
                   className="w-full rounded-full bg-blue-700 px-4 pb-1.5 pt-2.5 font-display font-bold text-white"
                 >
                   Confirm

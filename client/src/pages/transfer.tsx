@@ -1,13 +1,13 @@
 import { useEffect } from "react";
-import { chainBreak, signer, title } from "../../signals";
+import { chainBreak, signer, title } from "../signals";
 import * as Tabs from "@radix-ui/react-tabs";
-import Input from "../../components/Input";
-import Button from "../../components/Button";
-import AddressInput from "../../components/AddressInput";
+import Input from "../components/Input";
+import Button from "../components/Button";
+import AddressInput from "../components/AddressInput";
 import { useAtomValue } from "jotai";
-import { debtClearingAllowedAtom } from "../../states";
-import { showToast } from "../../utils/toast";
-import useMetamask from "../../hooks/useMetamask";
+import { debtClearingAllowedAtom } from "../states";
+import { showToast } from "../utils/toast";
+import useMetamask from "../hooks/useMetamask";
 
 export default function Transfer() {
   const { updateContacts, myAddress } = useMetamask();

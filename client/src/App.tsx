@@ -3,6 +3,7 @@ import { Route } from "wouter";
 import Transfer from "./pages/transfer";
 import Contacts from "./pages/contacts";
 import History from "./pages/history";
+import Builder from "./pages/builder";
 import useMetamask from "./hooks/useMetamask";
 import { wallet } from "./signals";
 import { availableNetworks, metamaskExists } from "./constants";
@@ -10,10 +11,12 @@ import Dialog from "./components/Dialog";
 import metamaskLogo from "./assets/metamask.svg";
 import { Toaster } from "react-hot-toast";
 import PendingTransaction from "./components/PendingTransaction";
+import { usePathname } from "wouter/use-location";
 import { isAllowedNetwork } from "./utils/common.ts";
 
 function App() {
   const { providerExists, loadWallet } = useMetamask();
+  const pathname = usePathname();
 
   return !metamaskExists ? (
     <Dialog.Root open>
@@ -65,12 +68,16 @@ function App() {
   ) : (
     <>
       <Toaster containerClassName="z-50" position="bottom-center" reverseOrder={false} />
-      <Layout>
-        <Route path="/" component={Transfer} />
-        <Route path="/contacts" component={Contacts} />
-        <Route path="/history" component={History} />
-        <PendingTransaction />
-      </Layout>
+      {pathname === "/builder" ? (
+        <Builder />
+      ) : (
+        <Layout>
+          <Route path="/" component={Transfer} />
+          <Route path="/contacts" component={Contacts} />
+          <Route path="/history" component={History} />
+          <PendingTransaction />
+        </Layout>
+      )}
     </>
   );
 }

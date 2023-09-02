@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import { title, transactions } from "../../signals";
+import { title, transactions } from "../signals";
 import * as Tabs from "@radix-ui/react-tabs";
-import type { Tx } from "../../types";
-import { cx } from "../../utils/common";
-import { namedContactsAtom } from "../../states";
+import type { Tx } from "../types";
+import { cx } from "../utils/common";
+import { namedContactsAtom } from "../states";
 import { useAtom } from "jotai";
-import AddressText from "../../components/AddressText";
+import AddressText from "../components/AddressText";
 
 export default function History() {
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function History() {
           className="min-w-0 flex-1 rounded-t-2xl border-b-2 border-gray-800 px-4 py-3 data-[state=active]:border-2 data-[state=active]:border-b-0 data-[state=active]:font-semibold"
           value="withdraws"
         >
-          Withdraws
+          Withdrawals
         </Tabs.Trigger>
       </Tabs.List>
       <main className="h-[calc(100%-126px)] overflow-y-auto overscroll-y-none">
@@ -82,7 +82,7 @@ function Item({ tx }: { tx: Tx }) {
       <div className="w-full truncate text-lg font-medium">
         {nc ? nc.name : <AddressText className="!justify-start" address={tx.address} />}
       </div>
-      <div className="w-full truncate">Status: {tx.status}</div>
+      <div className="w-full truncate">Status: {tx.status.startsWith("pending") ? "pending" : tx.status}</div>
       <div className="w-full truncate">Amount: ${tx.amount.toString()}</div>
       {tx.description && <div className="w-full truncate">Message: {tx.description}</div>}
     </li>
