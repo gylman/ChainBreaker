@@ -9,10 +9,6 @@ import Input from "./Input";
 export default function PendingTransaction() {
   const { updateContacts } = useMetamask();
 
-  useEffect(() => {
-    title.value = "Transfer";
-  }, []);
-
   const firstPendingTransaction = transactions.value
     .filter((tx) => (tx.isUser1 && tx.status === "pendingFor1") || (!tx.isUser1 && tx.status === "pendingFor2"))
     .at(0);
