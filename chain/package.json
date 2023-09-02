@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@typechain/ethers-v6": "^0.5.0",
+    "@types/lodash": "^4.14.197",
+    "lodash": "^4.17.21",
     "prettier": "^3.0.3"
   }
 }
