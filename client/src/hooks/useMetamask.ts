@@ -29,6 +29,7 @@ export default function useMetamask() {
       if (provider) {
         window.ethereum?.on("accountsChanged", refreshAccounts);
         window.ethereum?.on("chainChanged", refreshChain);
+        window.ethereum?.on("chainChanged", updateWallet);
         const provider = new ethers.BrowserProvider(window.ethereum);
         setProvider(provider ?? undefined);
         signer.value = await provider.getSigner();

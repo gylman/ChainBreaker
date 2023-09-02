@@ -10,6 +10,7 @@ import Dialog from "./components/Dialog";
 import metamaskLogo from "./assets/metamask.svg";
 import { Toaster } from "react-hot-toast";
 import PendingTransaction from "./components/PendingTransaction";
+import { isAllowedNetwork } from "./utils/common.ts";
 
 function App() {
   const { providerExists, loadWallet } = useMetamask();
@@ -54,6 +55,8 @@ function App() {
         </div>
       </Dialog.Content>
     </Dialog.Root>
+  ) : isAllowedNetwork(wallet.value.chainId.toString()) ? (
+    <div>Wrong network</div>
   ) : (
     <>
       <Toaster containerClassName="z-50" position="bottom-center" reverseOrder={false} />
