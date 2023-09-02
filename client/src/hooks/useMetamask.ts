@@ -40,7 +40,7 @@ export default function useMetamask() {
           })
           .then((res: string) => parseInt(res, 16).toString());
         chainBreak.value = ChainBreak__factory.connect(
-          availableNetworks.find(({ chainId: networkId }) => chainId === networkId)!.chainId,
+          availableNetworks.find(({ chainId: networkId }) => chainId === networkId)!.chainBreakAddress,
           provider,
         );
       }
