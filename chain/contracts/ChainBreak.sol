@@ -3,12 +3,19 @@ pragma solidity ^0.8.0;
 
 import "./Utility.sol";
 import "./interfaces/IChainBreak.sol";
+import "./ChainBreakNFT.sol";
+
 
 contract ChainBreak is IChainBreak {
+    ChainBreakNFT public cbNFT;
     // all addresses user has _channels with
     mapping (address => address[]) private _userContacts;
     mapping (address => mapping (address => Channel)) private _channels;
     address[] private _users;
+
+    constructor() {
+        cbNFT = ChainBreakNFT(new ChainBreakNFT());
+    }
 
     function allUsers() external view returns (address[] memory) {
         return _users;
@@ -200,6 +207,7 @@ contract ChainBreak is IChainBreak {
             emit Transaction(user1, user2, _tx, _channel.txs.length - 1);
         }
 
+        cbNFT.mint(msg.sender);
         if (totalFees > 0) {
             payable(msg.sender).transfer(totalFees);
         }
