@@ -113,8 +113,8 @@ contract ChainBreak {
         Channel storage _channel = channels[user1][user2];
         Tx storage _tx = _channel.txs[idx];
 
-        require (!(_tx.status == TxStatus.Confirmed || _tx.status == TxStatus.Rejected), "ChainBreak::confirmTx: bad status");
-        require (!(_tx.amount > 0), "ChainBreak::confirmTx: bad amount");
+        require (!(_tx.status == TxStatus.Confirmed || _tx.status == TxStatus.Rejected), "ChainBreak::rejectTx: bad status");
+        require (!(_tx.amount > 0), "ChainBreak::rejectTx: bad amount");
 
         _tx.status = TxStatus.Rejected;
         emit TransactionRejected(user1, user2, _tx, idx);
@@ -149,14 +149,14 @@ contract ChainBreak {
 
     // user[i] sends amount to user[i + 1]
     function breakDebtCircuit(address[] memory users, int amount) external {
-        require (amount > 0, "ChainBreak::createTx: negative amount");
+        require (amount > 0, "ChainBreak::breakDebtCircuit: negative amount");
 
         address[] memory sorted = Utility.sort(users);
         // -2 because last elem == first elem
         for (uint i = 0; i < sorted.length - 2; i++) {
             require (sorted[i] != sorted[i + 1], "ChainBreak::breakDebtCircuit: duplicate elements");
         }
-        require (users[0] == users[users.length - 1], "breakDebtCircuit::breakDebtCircuit: bad path");
+        require (users[0] == users[users.length - 1], "ChainBreak::breakDebtCircuit: bad path");
         // all checks for correct path done, we have cyclic graph
 
         uint totalFees = 0;
@@ -169,13 +169,13 @@ contract ChainBreak {
                 _channel.balance1 += amount;
                 _channel.balance2 -= amount;
                 // tx amount should be lower or eq to user[i] debt to user[i + 1]
-                require (_channel.balance2 >= 0, "Bad operation");
+                require (_channel.balance2 >= 0, "ChainBreak::breakDebtCircuit: bad operation");
                 _tx = Tx(amount, "", uint32(block.timestamp), true, TxStatus.Confirmed, TxType.Auto);
             } else {
                 _channel.balance2 += amount;
                 _channel.balance1 -= amount;
                 // tx amount should be lower or eq to user[i + 1] debt to user[i]
-                require (_channel.balance1 >= 0, "Bad operation");
+                require (_channel.balance1 >= 0, "ChainBreak::breakDebtCircuit: bad operation");
                 _tx = Tx(amount, "", uint32(block.timestamp), false, TxStatus.Confirmed, TxType.Auto);
             }
             totalFees += _channel.fees;
