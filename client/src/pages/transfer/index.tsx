@@ -20,10 +20,7 @@ export default function Transfer() {
   const debtClearingAllowed = useAtomValue(debtClearingAllowedAtom);
 
   const firstPendingTransaction = transactions.value
-    .filter(
-      (tx) =>
-        ((tx.isUser1 && tx.status === "pendingFor1") || (!tx.isUser1 && tx.status === "pendingFor2")) && !tx.isSpent,
-    )
+    .filter((tx) => (tx.isUser1 && tx.status === "pendingFor1") || (!tx.isUser1 && tx.status === "pendingFor2"))
     .at(0);
 
   // example of a page

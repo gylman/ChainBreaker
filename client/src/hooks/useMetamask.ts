@@ -101,7 +101,6 @@ export default function useMetamask() {
       });
 
       transactions.value = transactionsArray.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-      console.log("transactions.value", transactions.value);
     };
     getUserContacts();
   }, [chainBreak.value, myAddress]);
