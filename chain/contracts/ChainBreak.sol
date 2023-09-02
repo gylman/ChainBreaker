@@ -2,45 +2,20 @@
 pragma solidity ^0.8.0;
 
 import "./Utility.sol";
-import "hardhat/console.sol";
-
-contract ChainBreak {
-    event Transaction(address user1, address user2, Tx transaction, uint idx);
-    event TransactionConfirmed(address user1, address user2, Tx transaction, uint idx);
-    event TransactionRejected(address user1, address user2, Tx transaction, uint idx);
+import "./interfaces/IChainBreak.sol";
+import "./ChainBreakNFT.sol";
 
 
-    enum TxStatus {CreatedBy1, CreatedBy2, Confirmed, Rejected}
-    enum TxType {Regular, Auto}
-
-    struct Tx {
-        int amount;
-        string description;
-        uint32 createdAt;
-        bool from1; // true: 1 -> 2, false: 2 -> 1
-        TxStatus status;
-        TxType txType;
-    }
-
-    struct Channel {
-        int balance1;
-        int balance2;
-        uint fees;
-
-        Tx[] txs;
-    }
-
-    struct TxView {
-        address user1;
-        address user2;
-        uint idx;
-        Tx tx;
-    }
-
+contract ChainBreak is IChainBreak {
+    ChainBreakNFT public cbNFT;
     // all addresses user has _channels with
     mapping (address => address[]) private _userContacts;
     mapping (address => mapping (address => Channel)) private _channels;
     address[] private _users;
+
+    constructor() {
+        cbNFT = ChainBreakNFT(new ChainBreakNFT());
+    }
 
     function allUsers() external view returns (address[] memory) {
         return _users;
@@ -52,6 +27,30 @@ contract ChainBreak {
 
     function sort(address user1, address user2) public pure returns (address, address) {
         return user1 <= user2 ? (user1, user2) : (user2, user1);
+    }
+
+    function getAllUserChannels(address user) public view returns (ChannelView[] memory) {
+        ChannelView[] memory views = new ChannelView[](_userContacts[user].length);
+        for (uint i = 0; i < _userContacts[user].length; i++) {
+            (address user1, address user2) = sort(user, _userContacts[user][i]);
+            views[i] = ChannelView({
+                user1 : user1,
+                user2 : user2,
+                channel : _channels[user1][user2]
+            });
+        }
+        return views;
+    }
+
+    function getAllData() external view returns (UserView[] memory) {
+        UserView[] memory views = new UserView[](_users.length);
+        for (uint i = 0; i < _users.length; i++) {
+            views[i] = UserView({
+                user : _users[i],
+                views : getAllUserChannels(_users[i])
+            });
+        }
+        return views;
     }
 
     function channelFor(address addr1, address addr2) public view returns (
@@ -95,7 +94,7 @@ contract ChainBreak {
         return txs;
     }
 
-    function createTx(address user, int amount, string calldata description, bool send) external payable {
+    function createTx(address user, int amount, string calldata description, bool send, uint32 dueDate) external payable {
         require (amount > 0, "ChainBreak::createTx: negative amount");
         require (user != msg.sender, "ChainBreak::createTx: bad user");
 
@@ -122,7 +121,7 @@ contract ChainBreak {
             _userContacts[user2].push(user1);
         }
 
-        Tx memory _tx = Tx(amount, description, uint32(block.timestamp), _from1, _status, TxType.Regular);
+        Tx memory _tx = Tx(amount, description, uint32(block.timestamp), dueDate, _from1, _status, TxType.Regular);
         _channel.fees += msg.value;
         _channel.txs.push(_tx);
 
@@ -192,13 +191,13 @@ contract ChainBreak {
                 _channel.balance2 -= amount;
                 // tx amount should be lower or eq to user[i] debt to user[i + 1]
                 require (_channel.balance2 >= 0, "ChainBreak::breakDebtCircuit: bad operation");
-                _tx = Tx(amount, "Auto resolve", uint32(block.timestamp), true, TxStatus.Confirmed, TxType.Auto);
+                _tx = Tx(amount, "Auto resolve", uint32(block.timestamp), 0, true, TxStatus.Confirmed, TxType.Auto);
             } else {
                 _channel.balance2 += amount;
                 _channel.balance1 -= amount;
                 // tx amount should be lower or eq to user[i + 1] debt to user[i]
                 require (_channel.balance1 >= 0, "ChainBreak::breakDebtCircuit: bad operation");
-                _tx = Tx(amount, "Auto resolve", uint32(block.timestamp), false, TxStatus.Confirmed, TxType.Auto);
+                _tx = Tx(amount, "Auto resolve", uint32(block.timestamp), 0, false, TxStatus.Confirmed, TxType.Auto);
             }
             totalFees += _channel.fees;
 
@@ -208,6 +207,7 @@ contract ChainBreak {
             emit Transaction(user1, user2, _tx, _channel.txs.length - 1);
         }
 
+        cbNFT.mint(msg.sender);
         if (totalFees > 0) {
             payable(msg.sender).transfer(totalFees);
         }
