@@ -6,8 +6,10 @@ import "./Utility.sol";
 contract ChainBreak {
     event Transaction(address user1, address user2, Tx transaction, uint idx);
     event TransactionConfirmed(address user1, address user2, Tx transaction, uint idx);
+    event TransactionRejected(address user1, address user2, Tx transaction, uint idx);
 
-    enum TxStatus {CreatedBy1, CreatedBy2, Confirmed}
+
+    enum TxStatus {CreatedBy1, CreatedBy2, Confirmed, Rejected}
     enum TxType {Regular, Auto}
 
     struct Tx {
@@ -59,7 +61,7 @@ contract ChainBreak {
 
         for (uint i = 0; i < userContacts[user].length; i++) {
             (address user1, address user2) = sort(userContacts[user][i], user);
-            Channel _channel = channels[user1][user2];
+            Channel storage _channel = channels[user1][user2];
             for (uint j = 0; j < _channel.txs.length; j++) {
                 if (
                     (user == user1 && _channel.txs[j].status == TxStatus.CreatedBy2) ||
@@ -76,7 +78,7 @@ contract ChainBreak {
                 }
             }
         }
-        return txs[:pointer];
+        return txs;
     }
 
     function createTx(address user, int amount, string calldata description, bool send) external payable {
@@ -105,13 +107,26 @@ contract ChainBreak {
         emit Transaction(user1, user2, _tx, _channel.txs.length - 1);
     }
 
+    function rejectTx(address user, uint idx) external {
+        (address user1, address user2) = sort(msg.sender, user);
+
+        Channel storage _channel = channels[user1][user2];
+        Tx storage _tx = _channel.txs[idx];
+
+        require (!(_tx.status == TxStatus.Confirmed || _tx.status == TxStatus.Rejected), "ChainBreak::confirmTx: bad status");
+        require (!(_tx.amount > 0), "ChainBreak::confirmTx: bad amount");
+
+        _tx.status = TxStatus.Rejected;
+        emit TransactionRejected(user1, user2, _tx, idx);
+    }
+
     function confirmTx(address user, uint idx) external {
         (address user1, address user2) = sort(msg.sender, user);
 
         Channel storage _channel = channels[user1][user2];
-        Tx memory _tx = _channel.txs[idx];
+        Tx storage _tx = _channel.txs[idx];
 
-        require (!(_tx.status == TxStatus.Confirmed), "ChainBreak::confirmTx: bad status");
+        require (!(_tx.status == TxStatus.Confirmed || _tx.status == TxStatus.Rejected), "ChainBreak::confirmTx: bad status");
         require (!(_tx.amount > 0), "ChainBreak::confirmTx: bad amount");
 
         if (_tx.status == TxStatus.CreatedBy1) {
@@ -129,7 +144,6 @@ contract ChainBreak {
             _channel.balance2 += _tx.amount;
         }
 
-        _channel.txs[idx] = _tx;
         emit TransactionConfirmed(user1, user2, _tx, idx);
     }
 
