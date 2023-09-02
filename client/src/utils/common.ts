@@ -9,5 +9,6 @@ export function cx(...args: unknown[]) {
 }
 
 export const isAllowedNetwork = (chainId: string): boolean => {
-  return availableNetworks.map((el) => el.chainId).includes(chainId);
+  console.log("isAllowedNetwork", parseInt(chainId, 16));
+  return availableNetworks.map((el) => el.chainId).includes(parseInt(chainId, 16).toString());
 };

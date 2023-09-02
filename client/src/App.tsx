@@ -5,7 +5,7 @@ import Contacts from "./pages/contacts";
 import History from "./pages/history";
 import useMetamask from "./hooks/useMetamask";
 import { wallet } from "./signals";
-import { metamaskExists } from "./constants";
+import { availableNetworks, metamaskExists } from "./constants";
 import Dialog from "./components/Dialog";
 import metamaskLogo from "./assets/metamask.svg";
 import { Toaster } from "react-hot-toast";
@@ -55,8 +55,13 @@ function App() {
         </div>
       </Dialog.Content>
     </Dialog.Root>
-  ) : isAllowedNetwork(wallet.value.chainId.toString()) ? (
-    <div>Wrong network</div>
+  ) : !isAllowedNetwork(wallet.value.chainId.toString()) ? (
+    <Dialog.Root open>
+      <Dialog.Content>
+        <Dialog.Title className="mb-1">Oops, unsupported network!</Dialog.Title>
+        <p>Supported networks: {availableNetworks.map(({ networkName }) => networkName).join(", ")}</p>
+      </Dialog.Content>
+    </Dialog.Root> // Todo need to add mall popup if the network is wrong
   ) : (
     <>
       <Toaster containerClassName="z-50" position="bottom-center" reverseOrder={false} />

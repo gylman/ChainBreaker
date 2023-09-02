@@ -5,6 +5,7 @@ import { chainBreak, contacts, signer, transactions, wallet } from "../signals";
 import { formatBalance } from "../utils/metamask";
 import { ChainBreak__factory } from "../abi/types";
 import type { Tx } from "../types";
+import { availableNetworks } from "../constants.ts";
 
 export default function useMetamask() {
   const [provider, setProvider] = useState<ethers.BrowserProvider | undefined>(undefined);
@@ -33,7 +34,15 @@ export default function useMetamask() {
         const provider = new ethers.BrowserProvider(window.ethereum);
         setProvider(provider ?? undefined);
         signer.value = await provider.getSigner();
-        chainBreak.value = ChainBreak__factory.connect(import.meta.env.VITE_CHAINBREAK_ADDRESS, provider);
+        const chainId = await window.ethereum
+          .request({
+            method: "eth_chainId",
+          })
+          .then((res: string) => parseInt(res, 16).toString());
+        chainBreak.value = ChainBreak__factory.connect(
+          availableNetworks.find(({ chainId: networkId }) => chainId === networkId)!.chainId,
+          provider,
+        );
       }
     };
 
