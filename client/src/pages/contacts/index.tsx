@@ -159,7 +159,7 @@ export default function Contacts() {
                     <span className="shrink-0 rounded-full border-2 border-gray-800 px-2 text-sm">owes you</span>
                   )}
                   {balance < 0 && (
-                    <span className="shrink-0 rounded-full border-2 border-gray-800 px-2 text-sm">you owe</span>
+                    <span className="shrink-0 rounded-full border-2 border-gray-800 px-2 text-sm">lent you</span>
                   )}
                   {/* <span className="shrink-0 rounded-full border-2 border-red-800 bg-red-600 px-2 text-sm text-white">
                   expired
