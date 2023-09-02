@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import { title, transactions } from "../../signals";
+import { title, transactions } from "../signals";
 import * as Tabs from "@radix-ui/react-tabs";
-import type { Tx } from "../../types";
-import { cx } from "../../utils/common";
-import { namedContactsAtom } from "../../states";
+import type { Tx } from "../types";
+import { cx } from "../utils/common";
+import { namedContactsAtom } from "../states";
 import { useAtom } from "jotai";
-import AddressText from "../../components/AddressText";
+import AddressText from "../components/AddressText";
 
 export default function History() {
   useEffect(() => {
