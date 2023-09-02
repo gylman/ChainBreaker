@@ -23,7 +23,7 @@ describe("ChainBreak", function () {
     contract = await ethers.deployContract("ChainBreak", []);
     await contract
       .connect(user1)
-      .createTx(user2, 100, "test", true, { from: user1.address })
+      .createTx(user2, 100, "test", true, 0, { from: user1.address })
       .then((tx) => tx.wait());
   });
 
@@ -58,7 +58,7 @@ describe("ChainBreak", function () {
   });
 
   it("create second channel", async () => {
-    await contract.connect(user2).createTx(user3, 200, "test", true);
+    await contract.connect(user2).createTx(user3, 200, "test", true, 0);
 
     await contract.connect(user3).confirmTx(user2, 0);
     const [, , { balance1, balance2 }] = await contract.channelFor(
@@ -69,7 +69,7 @@ describe("ChainBreak", function () {
     expect(balance2).to.equal(-200);
   });
   it("create channel between 1 and 3 user", async () => {
-    await contract.connect(user3).createTx(user1, 300, "test", true);
+    await contract.connect(user3).createTx(user1, 300, "test", true, 0);
     await contract.connect(user1).confirmTx(user3, 0);
     const [, , { balance1, balance2 }] = await contract.channelFor(
       user1,
@@ -106,9 +106,14 @@ describe("ChainBreak", function () {
           .reverse()
           .value(),
       );
+    const res = await contract.tryFindDebtCircuit();
+    console.log(res);
+
+
     const route = [...semiRoute, semiRoute[0]];
+    console.log(route.map((el) => el.user!));
     await contract.connect(deployer).breakDebtCircuit(
-      route.map((el) => el.user!),
+      res[0].map(i => i),
       100,
     );
     {
@@ -137,7 +142,7 @@ describe("ChainBreak", function () {
     }
   });
   it("user reject transaction", async () => {
-    await contract.connect(user1).createTx(user2, 100, "test", true);
+    await contract.connect(user1).createTx(user2, 100, "test", true, 0);
     const [, , { txs }] = await contract.channelFor(user1, user2);
     expect(txs.at(-1)?.status).to.equal(1);
 
