@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import { chainBreak, contacts, signer, transactions, wallet } from "../signals";
 import { formatBalance } from "../utils/metamask";
 import { ChainBreak__factory } from "../abi/types";
-import { daiAddress } from "../constants";
 import type { Tx } from "../types";
 
 export default function useMetamask() {
@@ -33,7 +32,7 @@ export default function useMetamask() {
         const provider = new ethers.BrowserProvider(window.ethereum);
         setProvider(provider ?? undefined);
         signer.value = await provider.getSigner();
-        chainBreak.value = ChainBreak__factory.connect(daiAddress, provider);
+        chainBreak.value = ChainBreak__factory.connect(import.meta.env.VITE_CHAINBREAK_ADDRESS, provider);
       }
     };
 

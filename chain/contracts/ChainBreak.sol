@@ -213,4 +213,74 @@ contract ChainBreak is IChainBreak {
         }
     }
 
+    // -----------------------------------------------------------------------------
+    // ONLY FOR MVP AND TESTING!
+    function tryFindDebtCircuit() external view returns (address[] memory, int) {
+        // cases for 3
+        uint8[4][2] memory indices1 = [
+            [0, 1, 2, 0],
+            [0, 2, 1, 0]
+        ];
+        // cases for 4
+        uint8[5][6] memory indices2 = [
+            [0, 1, 2, 3, 0],
+            [0, 2, 1, 3, 0],
+            [0, 3, 1, 2, 0],
+            [0, 1, 3, 2, 0],
+            [0, 2, 3, 1, 0],
+            [0, 3, 2, 1, 0]
+        ];
+
+        for (uint i = 0; i < indices1.length; i++) {
+            int amount = getMinAmount(_users[indices1[i][0]],_users[indices1[i][1]],_users[indices1[i][2]]);
+            address[] memory users = new address[](4);
+            (users[0], users[1], users[2], users[3]) = (_users[indices1[i][0]],_users[indices1[i][1]],_users[indices1[i][2]], _users[indices1[i][3]]);
+            bool correct = isDebtCircuit(users, amount);
+            if (correct) return (users, amount);
+        }
+
+        for (uint i = 0; i < indices2.length; i++) {
+            int amount1 = getMinAmount(_users[indices2[i][0]],_users[indices2[i][1]],_users[indices2[i][2]]);
+            int amount2 = getMinAmount(_users[indices2[i][1]],_users[indices2[i][2]],_users[indices2[i][3]]);
+            if (amount1 > amount2) amount1 = amount2;
+
+            address[] memory users = new address[](5);
+            (users[0], users[1], users[2], users[3], users[4]) = (_users[indices2[i][0]],_users[indices2[i][1]],_users[indices2[i][2]], _users[indices2[i][3]], _users[indices2[i][4]]);
+            bool correct = isDebtCircuit(users, amount1);
+            if (correct) return (users, amount1);
+        }
+    }
+
+
+    function getMinAmount(address user1, address user2, address user3) public view returns (int amount) {
+        amount = type(int).max;
+        (,,Channel memory _channel1) = channelFor(user1, user2);
+        (,,Channel memory _channel2) = channelFor(user2, user3);
+        (,,Channel memory _channel3) = channelFor(user3, user1);
+
+        if (Utility.abs(_channel1.balance1) < amount) amount = Utility.abs(_channel1.balance1);
+        if (Utility.abs(_channel2.balance1) < amount) amount = Utility.abs(_channel2.balance1);
+        if (Utility.abs(_channel3.balance1) < amount) amount = Utility.abs(_channel3.balance1);
+    }
+
+
+    function isDebtCircuit(address[] memory users, int amount) public view returns (bool) {
+        for (uint i = 0; i < users.length - 1; i++) {
+            (address user1, address user2) = sort(users[i], users[i + 1]);
+            Channel memory _channel = _channels[user1][user2];
+            if (users[i] == user1) {
+                _channel.balance1 += amount;
+                _channel.balance2 -= amount;
+                // tx amount should be lower or eq to user[i] debt to user[i + 1]
+                if (_channel.balance2 < 0) return false;
+            } else {
+                _channel.balance2 += amount;
+                _channel.balance1 -= amount;
+                // tx amount should be lower or eq to user[i + 1] debt to user[i]
+                if (_channel.balance1 < 0) return false;
+            }
+        }
+        return true;
+    }
+
 }

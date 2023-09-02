@@ -1,6 +1,5 @@
-import { useEffect } from "react";
 import useMetamask from "../hooks/useMetamask";
-import { title, transactions, chainBreak, signer } from "../signals";
+import { transactions, chainBreak, signer } from "../signals";
 import { showToast } from "../utils/toast";
 import Button from "./Button";
 import Dialog from "./Dialog";
@@ -8,10 +7,6 @@ import Input from "./Input";
 
 export default function PendingTransaction() {
   const { updateContacts } = useMetamask();
-
-  useEffect(() => {
-    title.value = "Transfer";
-  }, []);
 
   const firstPendingTransaction = transactions.value
     .filter((tx) => (tx.isUser1 && tx.status === "pendingFor1") || (!tx.isUser1 && tx.status === "pendingFor2"))
