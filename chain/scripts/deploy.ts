@@ -1,7 +1,10 @@
 import { ethers } from "hardhat";
 
 async function main() {
-  const lock = await ethers.deployContract("ChainBreak");
+  const lock = await ethers.deployContract("ChainBreak", {
+    // gasPrice: ethers.parseUnits("2", "gwei"),
+    gasLimit: 1000000,
+  });
 
   await lock.waitForDeployment();
 

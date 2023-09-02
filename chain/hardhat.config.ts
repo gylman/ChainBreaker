@@ -5,7 +5,15 @@ dotenv.config();
 const config: HardhatUserConfig = {
   networks: {
     zkevm: {
-      url: `https://rpc.public.zkevm-test.net`,
+      url: "https://rpc.public.zkevm-test.net",
+      accounts: [process.env.PRIVATE_KEY_MUMBAI!],
+    },
+    linea: {
+      url: "https://rpc.goerli.linea.build",
+      accounts: [process.env.PRIVATE_KEY_MUMBAI!],
+    },
+    taiko: {
+      url: "https://rpc.test.taiko.xyz",
       accounts: [process.env.PRIVATE_KEY_MUMBAI!],
     },
   },
