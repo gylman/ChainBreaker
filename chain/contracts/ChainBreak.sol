@@ -36,9 +36,14 @@ contract ChainBreak {
         Tx tx;
     }
 
-    // all addresses user has channels with
-    mapping (address => address[]) public userContacts;
-    mapping (address => mapping (address => Channel)) private channels;
+    // all addresses user has _channels with
+    mapping (address => address[]) public _userContacts;
+    mapping (address => mapping (address => Channel)) private _channels;
+    address[] private _users;
+
+    function allUsers() external view returns (address[] memory) {
+        return _users;
+    }
 
     function sort(address user1, address user2) public pure returns (address, address) {
         return user1 <= user2 ? (user1, user2) : (user2, user1);
@@ -46,12 +51,12 @@ contract ChainBreak {
 
     function channelFor(address user1, address user2) public view returns (Channel memory) {
         (user1, user2) = sort(user1, user2);
-        return channels[user1][user2];
+        return _channels[user1][user2];
     }
 
     function getTx(address user1, address user2, uint idx) external view returns (Tx memory) {
         (user1, user2) = sort(user1, user2);
-        return channels[user1][user2].txs[idx];
+        return _channels[user1][user2].txs[idx];
     }
 
     function getPendingTxs(address user) external view returns (TxView[] memory) {
@@ -59,9 +64,9 @@ contract ChainBreak {
         TxView[] memory txs = new TxView[](100);
         uint pointer = 0;
 
-        for (uint i = 0; i < userContacts[user].length; i++) {
-            (address user1, address user2) = sort(userContacts[user][i], user);
-            Channel storage _channel = channels[user1][user2];
+        for (uint i = 0; i < _userContacts[user].length; i++) {
+            (address user1, address user2) = sort(_userContacts[user][i], user);
+            Channel storage _channel = _channels[user1][user2];
             for (uint j = 0; j < _channel.txs.length; j++) {
                 if (
                     (user == user1 && _channel.txs[j].status == TxStatus.CreatedBy2) ||
@@ -95,10 +100,17 @@ contract ChainBreak {
             _from1 = !send;
         }
 
-        Channel storage _channel = channels[user1][user2];
+        Channel storage _channel = _channels[user1][user2];
+        if (_userContacts[user1].length == 0) {
+            _users.push(user1);
+        }
+        if (_userContacts[user2].length == 0) {
+            _users.push(user2);
+        }
+        
         if (_channel.txs.length == 0) {
-            userContacts[user1].push(user2);
-            userContacts[user2].push(user1);
+            _userContacts[user1].push(user2);
+            _userContacts[user2].push(user1);
         }
 
         Tx memory _tx = Tx(amount, description, uint32(block.timestamp), _from1, _status, TxType.Regular);
@@ -111,7 +123,7 @@ contract ChainBreak {
     function rejectTx(address user, uint idx) external {
         (address user1, address user2) = sort(msg.sender, user);
 
-        Channel storage _channel = channels[user1][user2];
+        Channel storage _channel = _channels[user1][user2];
         Tx storage _tx = _channel.txs[idx];
 
         require (!(_tx.status == TxStatus.Confirmed || _tx.status == TxStatus.Rejected), "ChainBreak::rejectTx: bad status");
@@ -124,7 +136,7 @@ contract ChainBreak {
     function confirmTx(address user, uint idx) external {
         (address user1, address user2) = sort(msg.sender, user);
 
-        Channel storage _channel = channels[user1][user2];
+        Channel storage _channel = _channels[user1][user2];
         Tx storage _tx = _channel.txs[idx];
 
         require (!(_tx.status == TxStatus.Confirmed || _tx.status == TxStatus.Rejected), "ChainBreak::confirmTx: bad status");
@@ -164,20 +176,20 @@ contract ChainBreak {
         for (uint i = 0; i < users.length - 1; i++) {
             (address user1, address user2) = sort(users[i], users[i + 1]);
 
-            Channel storage _channel = channels[user1][user2];
+            Channel storage _channel = _channels[user1][user2];
             Tx memory _tx;
             if (users[i] == user1) {
                 _channel.balance1 += amount;
                 _channel.balance2 -= amount;
                 // tx amount should be lower or eq to user[i] debt to user[i + 1]
                 require (_channel.balance2 >= 0, "ChainBreak::breakDebtCircuit: bad operation");
-                _tx = Tx(amount, "", uint32(block.timestamp), true, TxStatus.Confirmed, TxType.Auto);
+                _tx = Tx(amount, "Auto resolve", uint32(block.timestamp), true, TxStatus.Confirmed, TxType.Auto);
             } else {
                 _channel.balance2 += amount;
                 _channel.balance1 -= amount;
                 // tx amount should be lower or eq to user[i + 1] debt to user[i]
                 require (_channel.balance1 >= 0, "ChainBreak::breakDebtCircuit: bad operation");
-                _tx = Tx(amount, "", uint32(block.timestamp), false, TxStatus.Confirmed, TxType.Auto);
+                _tx = Tx(amount, "Auto resolve", uint32(block.timestamp), false, TxStatus.Confirmed, TxType.Auto);
             }
             totalFees += _channel.fees;
 
