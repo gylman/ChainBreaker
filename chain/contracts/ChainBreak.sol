@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./Utility.sol";
+import "hardhat/console.sol";
 
 contract ChainBreak {
     event Transaction(address user1, address user2, Tx transaction, uint idx);
