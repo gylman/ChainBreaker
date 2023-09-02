@@ -14,6 +14,7 @@ interface IChainBreak {
         int amount;
         string description;
         uint32 createdAt;
+        uint32 dueDate;
         bool from1; // true: 1 -> 2, false: 2 -> 1
         TxStatus status;
         TxType txType;

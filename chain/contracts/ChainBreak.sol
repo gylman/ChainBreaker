@@ -87,7 +87,7 @@ contract ChainBreak is IChainBreak {
         return txs;
     }
 
-    function createTx(address user, int amount, string calldata description, bool send) external payable {
+    function createTx(address user, int amount, string calldata description, bool send, uint32 dueDate) external payable {
         require (amount > 0, "ChainBreak::createTx: negative amount");
         require (user != msg.sender, "ChainBreak::createTx: bad user");
 
@@ -114,7 +114,7 @@ contract ChainBreak is IChainBreak {
             _userContacts[user2].push(user1);
         }
 
-        Tx memory _tx = Tx(amount, description, uint32(block.timestamp), _from1, _status, TxType.Regular);
+        Tx memory _tx = Tx(amount, description, uint32(block.timestamp), dueDate, _from1, _status, TxType.Regular);
         _channel.fees += msg.value;
         _channel.txs.push(_tx);
 
@@ -184,13 +184,13 @@ contract ChainBreak is IChainBreak {
                 _channel.balance2 -= amount;
                 // tx amount should be lower or eq to user[i] debt to user[i + 1]
                 require (_channel.balance2 >= 0, "ChainBreak::breakDebtCircuit: bad operation");
-                _tx = Tx(amount, "Auto resolve", uint32(block.timestamp), true, TxStatus.Confirmed, TxType.Auto);
+                _tx = Tx(amount, "Auto resolve", uint32(block.timestamp), 0, true, TxStatus.Confirmed, TxType.Auto);
             } else {
                 _channel.balance2 += amount;
                 _channel.balance1 -= amount;
                 // tx amount should be lower or eq to user[i + 1] debt to user[i]
                 require (_channel.balance1 >= 0, "ChainBreak::breakDebtCircuit: bad operation");
-                _tx = Tx(amount, "Auto resolve", uint32(block.timestamp), false, TxStatus.Confirmed, TxType.Auto);
+                _tx = Tx(amount, "Auto resolve", uint32(block.timestamp), 0, false, TxStatus.Confirmed, TxType.Auto);
             }
             totalFees += _channel.fees;
 
