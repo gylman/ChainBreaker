@@ -114,7 +114,7 @@ contract ChainBreak {
         Tx storage _tx = _channel.txs[idx];
 
         require (!(_tx.status == TxStatus.Confirmed || _tx.status == TxStatus.Rejected), "ChainBreak::rejectTx: bad status");
-        require (!(_tx.amount > 0), "ChainBreak::rejectTx: bad amount");
+        require (_tx.amount > 0, "ChainBreak::rejectTx: bad amount");
 
         _tx.status = TxStatus.Rejected;
         emit TransactionRejected(user1, user2, _tx, idx);
@@ -127,7 +127,7 @@ contract ChainBreak {
         Tx storage _tx = _channel.txs[idx];
 
         require (!(_tx.status == TxStatus.Confirmed || _tx.status == TxStatus.Rejected), "ChainBreak::confirmTx: bad status");
-        require (!(_tx.amount > 0), "ChainBreak::confirmTx: bad amount");
+        require (_tx.amount > 0, "ChainBreak::confirmTx: bad amount");
 
         if (_tx.status == TxStatus.CreatedBy1) {
             require (msg.sender == user2, "ChainBreak::confirmTx: cant confirm");
