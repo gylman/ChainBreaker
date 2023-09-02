@@ -8,5 +8,6 @@ module.exports = {
   rules: {
     quotes: ["error", "double"],
     "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+    "sort-imports": "error",
   },
 };
