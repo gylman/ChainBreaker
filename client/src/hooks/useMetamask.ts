@@ -28,6 +28,8 @@ export default function useMetamask() {
       const provider = await detectEthereumProvider({ silent: true, mustBeMetaMask: true });
 
       if (provider) {
+        window.ethereum?.on("accountsChanged", refreshAccounts);
+        window.ethereum?.on("chainChanged", refreshChain);
         const provider = new ethers.BrowserProvider(window.ethereum);
         setProvider(provider ?? undefined);
         signer.value = await provider.getSigner();
