@@ -2,20 +2,20 @@ import { Combobox, ComboboxProps } from "@headlessui/react";
 import { type ElementType, useState } from "react";
 import { cx } from "../utils/common";
 import { IconCheck } from "@tabler/icons-react";
+import { contacts } from "../signals";
+import { useAtom } from "jotai";
+import { namedContactsAtom } from "../states";
 
 type Contact = { name?: string; address: string };
-const contacts: Contact[] = [
-  { name: "Alice", address: "0x1830d292" },
-  { name: "Brian", address: "0x500d29a3" },
-  { name: "Chris", address: "0xc20f721a" },
-  { name: "David", address: "0x9377f024" },
-  { address: "0x93918822" },
-  { address: "0x27940ff2" },
-  { address: "0x720deaa2" },
-];
 
 export default function AddressInput(props: ComboboxProps<Contact, false, false, ElementType>) {
   const [query, setQuery] = useState("");
+  const [namedContacts] = useAtom(namedContactsAtom);
+
+  const candidates: Contact[] = contacts.value.map(({ address }) => ({
+    address,
+    name: namedContacts.find((nc) => nc.address === address)?.name,
+  }));
 
   const isQueryAddress = query.startsWith("0x") && query.slice(2).match(/^[0-9a-f]*$/i);
   const filteredContacts =
@@ -23,10 +23,10 @@ export default function AddressInput(props: ComboboxProps<Contact, false, false,
       ? []
       : query.startsWith("0")
       ? [
-          ...contacts.filter((contact) => contact.address.toLocaleLowerCase().startsWith(query.toLocaleLowerCase())),
-          ...contacts.filter((contact) => contact.name?.toLocaleLowerCase().startsWith(query.toLocaleLowerCase())),
+          ...candidates.filter((contact) => contact.address.toLocaleLowerCase().startsWith(query.toLocaleLowerCase())),
+          ...candidates.filter((contact) => contact.name?.toLocaleLowerCase().startsWith(query.toLocaleLowerCase())),
         ]
-      : contacts.filter((contact) => contact.name?.toLocaleLowerCase().startsWith(query.toLocaleLowerCase()));
+      : candidates.filter((contact) => contact.name?.toLocaleLowerCase().startsWith(query.toLocaleLowerCase()));
 
   return (
     <Combobox as="div" {...props} className="relative">

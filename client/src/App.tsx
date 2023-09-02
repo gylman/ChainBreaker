@@ -8,14 +8,10 @@ import { wallet } from "./signals";
 import { metamaskExists } from "./constants";
 import Dialog from "./components/Dialog";
 import metamaskLogo from "./assets/metamask.svg";
-import { useSignalEffect } from "@preact/signals-react";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const { providerExists, loadWallet } = useMetamask();
-
-  useSignalEffect(() => {
-    console.log(wallet.value);
-  });
 
   return !metamaskExists ? (
     <Dialog.Root open>
@@ -58,11 +54,14 @@ function App() {
       </Dialog.Content>
     </Dialog.Root>
   ) : (
-    <Layout>
-      <Route path="/" component={Transfer} />
-      <Route path="/contacts" component={Contacts} />
-      <Route path="/history" component={History} />
-    </Layout>
+    <>
+      <Toaster containerClassName="z-50" position="bottom-center" reverseOrder={false} />
+      <Layout>
+        <Route path="/" component={Transfer} />
+        <Route path="/contacts" component={Contacts} />
+        <Route path="/history" component={History} />
+      </Layout>
+    </>
   );
 }
 

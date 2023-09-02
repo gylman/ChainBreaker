@@ -1,17 +1,20 @@
-import { useEffect, useState } from "react";
 import detectEthereumProvider from "@metamask/detect-provider";
-import { wallet } from "../signals";
+import { ethers } from "ethers";
+import { useCallback, useEffect, useState } from "react";
+import { chainBreak, contacts, signer, transactions, wallet } from "../signals";
 import { formatBalance } from "../utils/metamask";
+import { ChainBreak__factory } from "../abi/types";
+import { daiAddress } from "../constants";
+import type { Tx } from "../types";
 
 export default function useMetamask() {
-  const [providerExists, setProviderExists] = useState<boolean | undefined>(undefined);
+  const [provider, setProvider] = useState<ethers.BrowserProvider | undefined>(undefined);
 
   useEffect(() => {
     const refreshAccounts = (accounts: string[]) => {
       if (accounts.length > 0) {
         updateWallet(accounts);
       } else {
-        // if length 0, user is disconnected
         wallet.value = undefined;
       }
     };
@@ -21,14 +24,14 @@ export default function useMetamask() {
     };
 
     const getProvider = async () => {
-      const provider = await detectEthereumProvider({ silent: true });
-      setProviderExists(!!provider);
+      chainBreak.value = undefined;
+      const provider = await detectEthereumProvider({ silent: true, mustBeMetaMask: true });
 
       if (provider) {
-        const accounts = await window.ethereum.request({ method: "eth_accounts" });
-        refreshAccounts(accounts);
-        window.ethereum.on("accountsChanged", refreshAccounts);
-        window.ethereum.on("chainChanged", refreshChain);
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        setProvider(provider ?? undefined);
+        signer.value = await provider.getSigner();
+        chainBreak.value = ChainBreak__factory.connect(daiAddress, provider);
       }
     };
 
@@ -47,12 +50,11 @@ export default function useMetamask() {
         params: [accounts[0], "latest"],
       }),
     );
-    console.log("balance", balance);
 
     const chainId = await window.ethereum.request({
       method: "eth_chainId",
     });
-    wallet.value = { accounts, balance, chainId };
+    wallet.value = { accounts: accounts.map((address) => address.toLowerCase()), balance, chainId };
   };
 
   const loadWallet = async () => {
@@ -62,13 +64,56 @@ export default function useMetamask() {
     updateWallet(accounts);
   };
 
-  useEffect(() => {
-    const getProvider = async () => {
-      const provider = await detectEthereumProvider({ silent: true, mustBeMetaMask: true });
-      setProviderExists(!!provider);
-    };
-    getProvider();
-  }, []);
+  const myAddress = wallet.value?.accounts.at(0);
+  const updateContacts = useCallback(() => {
+    if (!chainBreak.value || !myAddress) return;
 
-  return { providerExists, loadWallet };
+    console.log("Updating contacts");
+
+    const chainBreakValue = chainBreak.value;
+
+    const getUserContacts = async () => {
+      const allUserChannels = await chainBreakValue.getAllUserChannels(myAddress);
+      const transactionsArray: Tx[] = [];
+      contacts.value = allUserChannels.map((view) => {
+        const isUser1 = view.user1.toLowerCase() === myAddress;
+        const counterpartAddress = (isUser1 ? view.user2 : view.user1).toLowerCase();
+        const transactionsOfUser = view.channel.txs.map((tx, idx) => {
+          const isSpent = tx.from1 === isUser1;
+          console.log(new Date(Number(tx.createdAt) * 1000), "tx.from1", tx.from1, "isUser1", isUser1);
+          return {
+            address: counterpartAddress,
+            amount: tx.amount,
+            isSpent, // === "red"
+            description: tx.description,
+            createdAt: new Date(Number(tx.createdAt) * 1000),
+            status: (["pendingFor2", "pendingFor1", "confirmed", "rejected"] as const)[Number(tx.status)],
+            isUser1,
+            idx,
+          };
+        });
+        transactionsArray.push(...transactionsOfUser);
+
+        return {
+          address: counterpartAddress,
+          balance: Number(isUser1 ? view.channel.balance1 : view.channel.balance2),
+        };
+      });
+
+      transactions.value = transactionsArray.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+      console.log("transactions.value", transactions.value);
+    };
+    getUserContacts();
+  }, [chainBreak.value, myAddress]);
+
+  useEffect(() => {
+    const interval = setInterval(updateContacts, 10_000);
+    updateContacts();
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [updateContacts]);
+
+  return { provider, providerExists: !!provider, loadWallet, updateContacts, myAddress };
 }
