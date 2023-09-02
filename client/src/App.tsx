@@ -9,6 +9,7 @@ import { metamaskExists } from "./constants";
 import Dialog from "./components/Dialog";
 import metamaskLogo from "./assets/metamask.svg";
 import { Toaster } from "react-hot-toast";
+import PendingTransaction from "./components/PendingTransaction";
 
 function App() {
   const { providerExists, loadWallet } = useMetamask();
@@ -60,6 +61,7 @@ function App() {
         <Route path="/" component={Transfer} />
         <Route path="/contacts" component={Contacts} />
         <Route path="/history" component={History} />
+        <PendingTransaction />
       </Layout>
     </>
   );

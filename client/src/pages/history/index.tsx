@@ -37,14 +37,14 @@ export default function History() {
       </Tabs.List>
       <main className="h-[calc(100%-126px)] overflow-y-auto overscroll-y-none">
         <Tabs.Content className="min-h-full space-y-6 p-6 pb-[5.5rem]" value="all">
-          <ul className="space-y-2">
+          <ul className="flex flex-col-reverse gap-2">
             {transactions.value.map((tx) => (
               <Item key={`${tx.address}:${tx.idx}`} tx={tx} />
             ))}
           </ul>
         </Tabs.Content>
         <Tabs.Content className="min-h-full space-y-6 p-6 pb-[5.5rem]" value="deposits">
-          <ul className="space-y-2">
+          <ul className="flex flex-col-reverse gap-2">
             {transactions.value
               .filter((tx) => !tx.isSpent)
               .map((tx) => (
@@ -53,7 +53,7 @@ export default function History() {
           </ul>
         </Tabs.Content>
         <Tabs.Content className="min-h-full space-y-6 p-6 pb-[5.5rem]" value="withdraws">
-          <ul className="space-y-2">
+          <ul className="flex flex-col-reverse gap-2">
             {transactions.value
               .filter((tx) => tx.isSpent)
               .map((tx) => (

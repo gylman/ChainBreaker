@@ -1,8 +1,7 @@
 import { useEffect } from "react";
-import { chainBreak, signer, title, transactions } from "../../signals";
+import { chainBreak, signer, title } from "../../signals";
 import * as Tabs from "@radix-ui/react-tabs";
 import Input from "../../components/Input";
-import Dialog from "../../components/Dialog";
 import Button from "../../components/Button";
 import AddressInput from "../../components/AddressInput";
 import { useAtomValue } from "jotai";
@@ -19,14 +18,6 @@ export default function Transfer() {
 
   const debtClearingAllowed = useAtomValue(debtClearingAllowedAtom);
 
-  const firstPendingTransaction = transactions.value
-    .filter(
-      (tx) =>
-        ((tx.isUser1 && tx.status === "pendingFor1") || (!tx.isUser1 && tx.status === "pendingFor2")) && !tx.isSpent,
-    )
-    .at(0);
-
-  // example of a page
   return (
     <>
       <Tabs.Root className="contents" defaultValue="receive">
@@ -184,81 +175,6 @@ export default function Transfer() {
           </form>
         </main>
       </Tabs.Root>
-
-      <Dialog.Root open={!!firstPendingTransaction}>
-        <Dialog.Content>
-          {firstPendingTransaction && (
-            <>
-              <Dialog.Title className="mb-1">Have You Received?</Dialog.Title>
-
-              <div className="space-y-2">
-                <fieldset className="space-y-0.5">
-                  <label className="text-sm font-semibold text-gray-800" htmlFor="confirm-other">
-                    From
-                  </label>
-                  <Input
-                    readOnly
-                    size="sm"
-                    id="confirm-other"
-                    name="confirm-other"
-                    value={firstPendingTransaction.address}
-                  />
-                </fieldset>
-                <fieldset className="space-y-0.5">
-                  <label className="text-sm font-semibold text-gray-800" htmlFor="confirm-amount">
-                    Amount
-                  </label>
-                  <div className="relative">
-                    <Input
-                      readOnly
-                      size="sm"
-                      id="confirm-amount"
-                      name="confirm-amount"
-                      value={"$ " + firstPendingTransaction.amount.toString()}
-                    />
-                  </div>
-                </fieldset>
-
-                <div className="flex gap-4 pt-4">
-                  <Button
-                    onClick={async () => {
-                      // confirm
-                      if (!chainBreak.value || !signer.value) return;
-                      await chainBreak.value
-                        .connect(signer.value)
-                        .rejectTx(firstPendingTransaction.address, firstPendingTransaction.idx)
-                        .then((res) => res.wait());
-
-                      updateContacts();
-                      showToast("Transaction successfully rejected!");
-                    }}
-                    type="button"
-                    className="w-full rounded-full bg-red-700 px-4 pb-1.5 pt-2.5 font-display font-bold text-white"
-                  >
-                    Reject
-                  </Button>
-                  <Button
-                    onClick={async () => {
-                      // confirm
-                      if (!chainBreak.value || !signer.value) return;
-                      await chainBreak.value
-                        .connect(signer.value)
-                        .confirmTx(firstPendingTransaction.address, firstPendingTransaction.idx)
-                        .then((res) => res.wait());
-
-                      updateContacts();
-                      showToast("Transaction successfully confirmed!");
-                    }}
-                    className="w-full rounded-full bg-blue-700 px-4 pb-1.5 pt-2.5 font-display font-bold text-white"
-                  >
-                    Confirm
-                  </Button>
-                </div>
-              </div>
-            </>
-          )}
-        </Dialog.Content>
-      </Dialog.Root>
     </>
   );
 }
