@@ -32,7 +32,7 @@ export default function History() {
           className="min-w-0 flex-1 rounded-t-2xl border-b-2 border-gray-800 px-4 py-3 data-[state=active]:border-2 data-[state=active]:border-b-0 data-[state=active]:font-semibold"
           value="withdraws"
         >
-          Withdraws
+          Withdrawals
         </Tabs.Trigger>
       </Tabs.List>
       <main className="h-[calc(100%-126px)] overflow-y-auto overscroll-y-none">
