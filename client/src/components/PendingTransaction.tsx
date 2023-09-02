@@ -1,6 +1,5 @@
-import { useEffect } from "react";
 import useMetamask from "../hooks/useMetamask";
-import { title, transactions, chainBreak, signer } from "../signals";
+import { transactions, chainBreak, signer } from "../signals";
 import { showToast } from "../utils/toast";
 import Button from "./Button";
 import Dialog from "./Dialog";
