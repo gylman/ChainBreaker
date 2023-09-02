@@ -83,6 +83,7 @@ contract ChainBreak {
 
     function createTx(address user, int amount, string calldata description, bool send) external payable {
         require (amount > 0, "ChainBreak::createTx: negative amount");
+        require (user != msg.sender, "ChainBreak::createTx: bad user");
 
         (address user1, address user2) = sort(msg.sender, user);
         TxStatus _status = msg.sender == user1 ? TxStatus.CreatedBy1 : TxStatus.CreatedBy2;
@@ -148,12 +149,12 @@ contract ChainBreak {
     }
 
     // user[i] sends amount to user[i + 1]
-    function breakDebtCircuit(address[] memory users, int amount) external {
+    function breakDebtCircuit(address[] calldata users, int amount) external {
         require (amount > 0, "ChainBreak::breakDebtCircuit: negative amount");
 
-        address[] memory sorted = Utility.sort(users);
+        address[] memory sorted = Utility.sort(users[:users.length - 1]);
         // -2 because last elem == first elem
-        for (uint i = 0; i < sorted.length - 2; i++) {
+        for (uint i = 0; i < sorted.length - 1; i++) {
             require (sorted[i] != sorted[i + 1], "ChainBreak::breakDebtCircuit: duplicate elements");
         }
         require (users[0] == users[users.length - 1], "ChainBreak::breakDebtCircuit: bad path");
@@ -186,7 +187,9 @@ contract ChainBreak {
             emit Transaction(user1, user2, _tx, _channel.txs.length - 1);
         }
 
-        payable(msg.sender).transfer(totalFees);
+        if (totalFees > 0) {
+            payable(msg.sender).transfer(totalFees);
+        }
     }
 
 }
