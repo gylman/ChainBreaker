@@ -38,14 +38,14 @@ contract ChainBreak {
     }
 
     // all addresses user has _channels with
-    mapping (address => address[]) public _userContacts;
+    mapping (address => address[]) private _userContacts;
     mapping (address => mapping (address => Channel)) private _channels;
     address[] private _users;
 
     function allUsers() external view returns (address[] memory) {
         return _users;
     }
-    
+
     function getUserContacts(address user) external view returns (address[]) {
         return _userContacts[user];
     }
