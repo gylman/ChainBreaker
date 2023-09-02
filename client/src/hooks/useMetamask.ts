@@ -16,8 +16,8 @@ export default function useMetamask() {
       }
     };
 
-    const refreshChain = (chainId: string) => {
-      wallet.value = { accounts: [], balance: "0", ...wallet.peek(), chainId };
+    const refreshChain = () => {
+      updateWallet(wallet.value?.accounts || []);
     };
 
     const getProvider = async () => {
