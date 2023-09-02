@@ -135,7 +135,7 @@ contract ChainBreak {
             require (msg.sender == user1, "ChainBreak::confirmTx: cant confirm");
         }
 
-        _tx.status == TxStatus.Confirmed;
+        _tx.status = TxStatus.Confirmed;
         if (_tx.from1) {
             _channel.balance1 += _tx.amount;
             _channel.balance2 -= _tx.amount;
