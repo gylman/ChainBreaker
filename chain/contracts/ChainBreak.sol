@@ -38,7 +38,7 @@ contract ChainBreak {
     }
 
     // all addresses user has _channels with
-    mapping (address => address[]) public _userContacts;
+    mapping (address => address[]) public userContacts;
     mapping (address => mapping (address => Channel)) private _channels;
     address[] private _users;
 
@@ -65,8 +65,8 @@ contract ChainBreak {
         TxView[] memory txs = new TxView[](100);
         uint pointer = 0;
 
-        for (uint i = 0; i < _userContacts[user].length; i++) {
-            (address user1, address user2) = sort(_userContacts[user][i], user);
+        for (uint i = 0; i < userContacts[user].length; i++) {
+            (address user1, address user2) = sort(userContacts[user][i], user);
             Channel storage _channel = _channels[user1][user2];
             for (uint j = 0; j < _channel.txs.length; j++) {
                 if (
@@ -102,16 +102,16 @@ contract ChainBreak {
         }
 
         Channel storage _channel = _channels[user1][user2];
-        if (_userContacts[user1].length == 0) {
+        if (userContacts[user1].length == 0) {
             _users.push(user1);
         }
-        if (_userContacts[user2].length == 0) {
+        if (userContacts[user2].length == 0) {
             _users.push(user2);
         }
         
         if (_channel.txs.length == 0) {
-            _userContacts[user1].push(user2);
-            _userContacts[user2].push(user1);
+            userContacts[user1].push(user2);
+            userContacts[user2].push(user1);
         }
 
         Tx memory _tx = Tx(amount, description, uint32(block.timestamp), _from1, _status, TxType.Regular);
