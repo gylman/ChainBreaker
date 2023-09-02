@@ -32,4 +32,8 @@ library  Utility {
         quickSort(sorted, int(0), int(sorted.length - 1));
         return sorted;
     }
+
+    function abs(int x) internal pure returns (int) {
+        return x >= 0 ? x : -x;
+    }
 }
