@@ -27,8 +27,16 @@ contract ChainBreak {
         Tx[] txs;
     }
 
-    mapping (address => mapping (address => Channel)) private channels;
+    struct TxView {
+        address user1;
+        address user2;
+        uint idx;
+        Tx tx;
+    }
 
+    // all addresses user has channels with
+    mapping (address => address[]) public userContacts;
+    mapping (address => mapping (address => Channel)) private channels;
 
     function sort(address user1, address user2) public pure returns (address, address) {
         return user1 <= user2 ? (user1, user2) : (user2, user1);
@@ -37,6 +45,38 @@ contract ChainBreak {
     function channelFor(address user1, address user2) public view returns (Channel memory) {
         (user1, user2) = sort(user1, user2);
         return channels[user1][user2];
+    }
+
+    function getTx(address user1, address user2, uint idx) external view returns (Tx memory) {
+        (user1, user2) = sort(user1, user2);
+        return channels[user1][user2].txs[idx];
+    }
+
+    function getPendingTxs(address user) external view returns (TxView[] memory) {
+        // optimistically
+        TxView[] memory txs = new TxView[](100);
+        uint pointer = 0;
+
+        for (uint i = 0; i < userContacts[user].length; i++) {
+            (address user1, address user2) = sort(userContacts[user][i], user);
+            Channel _channel = channels[user1][user2];
+            for (uint j = 0; j < _channel.txs.length; j++) {
+                if (
+                    (user == user1 && _channel.txs[j].status == TxStatus.CreatedBy2) ||
+                    (user == user2 && _channel.txs[j].status == TxStatus.CreatedBy1)
+                ) {
+                    txs[pointer] = TxView({
+                        user1: user1,
+                        user2: user2,
+                        idx: j,
+                        tx: _channel.txs[j]
+                    });
+                    pointer += 1;
+                    if (pointer == 100) return txs;
+                }
+            }
+        }
+        return txs[:pointer];
     }
 
     function createTx(address user, int amount, string calldata description, bool send) external payable {
@@ -53,6 +93,11 @@ contract ChainBreak {
         }
 
         Channel storage _channel = channels[user1][user2];
+        if (_channel.txs.length == 0) {
+            userContacts[user1].push(user2);
+            userContacts[user2].push(user1);
+        }
+
         Tx memory _tx = Tx(amount, description, uint32(block.timestamp), _from1, _status, TxType.Regular);
         _channel.fees += msg.value;
         _channel.txs.push(_tx);
