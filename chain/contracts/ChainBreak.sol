@@ -46,7 +46,7 @@ contract ChainBreak {
         return _users;
     }
 
-    function getUserContacts(address user) external view returns (address[]) {
+    function getUserContacts(address user) external view returns (address[] memory) {
         return _userContacts[user];
     }
 
@@ -54,9 +54,13 @@ contract ChainBreak {
         return user1 <= user2 ? (user1, user2) : (user2, user1);
     }
 
-    function channelFor(address user1, address user2) public view returns (Channel memory) {
-        (user1, user2) = sort(user1, user2);
-        return _channels[user1][user2];
+    function channelFor(address addr1, address addr2) public view returns (
+        address user1,
+        address user2,
+        Channel memory
+    ) {
+        (user1, user2) = sort(addr1, addr2);
+        return (user1, user2, _channels[user1][user2]);
     }
 
     function getTx(address user1, address user2, uint idx) external view returns (Tx memory) {
