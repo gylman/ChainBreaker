@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "./Utility.sol";
-import "hardhat/console.sol";
 
 contract ChainBreak {
     event Transaction(address user1, address user2, Tx transaction, uint idx);
@@ -30,6 +29,12 @@ contract ChainBreak {
         Tx[] txs;
     }
 
+    struct ChannelView {
+        address user1;
+        address user2;
+        Channel channel;
+    }
+
     struct TxView {
         address user1;
         address user2;
@@ -52,6 +57,19 @@ contract ChainBreak {
 
     function sort(address user1, address user2) public pure returns (address, address) {
         return user1 <= user2 ? (user1, user2) : (user2, user1);
+    }
+
+    function getAllUserChannels(address user) external view returns (ChannelView[] memory) {
+        ChannelView[] memory views = new ChannelView[](_userContacts[user].length);
+        for (uint i = 0; i < _userContacts[user].length; i++) {
+            (address user1, address user2) = sort(user, _userContacts[user][i]);
+            views[i] = ChannelView({
+                user1 : user1,
+                user2 : user2,
+                channel : _channels[user1][user2]
+            });
+        }
+        return views;
     }
 
     function channelFor(address addr1, address addr2) public view returns (
