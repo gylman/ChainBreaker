@@ -57,13 +57,13 @@ export default function Transfer() {
               const dueDateBigint = dueDateString ? BigInt(new Date(dueDateString).getTime() / 1000) : 0;
               const type = formData.get("type") as "receive" | "send";
 
-              const [user1] = await chainBreak.value.sort(myAddress, other);
-              const isUser1 = user1.toLowerCase() === myAddress;
-              const from1 = (type === "send" && isUser1) || (type === "receive" && !isUser1);
+              // const [user1] = await chainBreak.value.sort(myAddress, other);
+              // const isUser1 = user1.toLowerCase() === myAddress;
+              // const from1 = (type === "send" && isUser1) || (type === "receive" && !isUser1);
 
               await chainBreak.value
                 .connect(signer.value)
-                .createTx(other, amount, message, from1, dueDateBigint, {
+                .createTx(other, amount, message, type === "send", dueDateBigint, {
                   value: tip,
                 })
                 .then((res) => res.wait());
