@@ -24,15 +24,15 @@ export default function History() {
         </Tabs.Trigger>
         <Tabs.Trigger
           className="min-w-0 flex-1 rounded-t-2xl border-b-2 border-gray-800 py-3 data-[state=active]:border-2 data-[state=active]:border-b-0 data-[state=active]:font-semibold"
-          value="deposits"
+          value="withdrawals"
         >
-          Deposits
+          Withdrawals
         </Tabs.Trigger>
         <Tabs.Trigger
           className="min-w-0 flex-1 rounded-t-2xl border-b-2 border-gray-800 py-3 data-[state=active]:border-2 data-[state=active]:border-b-0 data-[state=active]:font-semibold"
-          value="withdraws"
+          value="deposits"
         >
-          Withdrawals
+          Deposits
         </Tabs.Trigger>
       </Tabs.List>
       <main className="h-[calc(100%-126px)] overflow-y-auto overscroll-y-none">
@@ -49,7 +49,7 @@ export default function History() {
             })()}
           </div>
         </Tabs.Content>
-        <Tabs.Content className="min-h-full space-y-6 p-6 pb-[10rem]" value="deposits">
+        <Tabs.Content className="min-h-full space-y-6 p-6 pb-[10rem]" value="withdrawals">
           <ul className="flex flex-col-reverse gap-2">
             {transactions.value
               .filter((tx) => !tx.isSpent)
@@ -66,7 +66,7 @@ export default function History() {
             })()}
           </div>
         </Tabs.Content>
-        <Tabs.Content className="min-h-full space-y-6 p-6 pb-[10rem]" value="withdraws">
+        <Tabs.Content className="min-h-full space-y-6 p-6 pb-[10rem]" value="deposits">
           <ul className="flex flex-col-reverse gap-2">
             {transactions.value
               .filter((tx) => tx.isSpent)

@@ -75,7 +75,7 @@ export default function Contacts() {
 
               setNamedContacts((contacts) => [
                 ...contacts.filter((contact) => contact.address.toLocaleLowerCase() !== address.toLocaleLowerCase()),
-                { address, name },
+                { address: address.toLowerCase(), name },
               ]);
               form.reset();
               showToast("New contact created!");
