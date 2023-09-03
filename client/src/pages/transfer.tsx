@@ -53,8 +53,8 @@ export default function Transfer() {
               const amount = BigInt(amountNumber);
               const tip = BigInt(tipNumber * 1e18);
               const message = formData.get("message") as string;
-              const dueDate = new Date(formData.get("due-date") as string);
-              const dueDateBigint = BigInt(dueDate.getTime() / 1000);
+              const dueDateString = formData.get("due-date") as string | null;
+              const dueDateBigint = dueDateString ? BigInt(new Date(dueDateString).getTime() / 1000) : 0;
               const type = formData.get("type") as "receive" | "send";
 
               const [user1] = await chainBreak.value.sort(myAddress, other);
@@ -92,9 +92,9 @@ export default function Transfer() {
               </fieldset>
               <fieldset className="space-y-1">
                 <label className="font-semibold text-gray-800" htmlFor="due-date">
-                  Due Date<span className="text-red-500">*</span>
+                  Due Date
                 </label>
-                <Input type="date" id="due-date" name="due-date" defaultValue="" required />
+                <Input type="date" id="due-date" name="due-date" defaultValue="" />
               </fieldset>
               <fieldset className="space-y-1">
                 <label className="font-semibold text-gray-800" htmlFor="message">
@@ -142,7 +142,7 @@ export default function Transfer() {
               </fieldset>
               <fieldset className="space-y-1">
                 <label className="font-semibold text-gray-800" htmlFor="due-date">
-                  Due Date<span className="text-red-500">*</span>
+                  Due Date
                 </label>
                 <Input type="date" id="due-date" name="due-date" defaultValue="" />
               </fieldset>
