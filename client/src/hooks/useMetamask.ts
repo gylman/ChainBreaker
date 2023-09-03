@@ -79,8 +79,6 @@ export default function useMetamask() {
   const updateContacts = useCallback(() => {
     if (!chainBreak.value || !myAddress) return;
 
-    console.log("Updating contacts");
-
     const chainBreakValue = chainBreak.value;
 
     const getUserContacts = async () => {
@@ -91,7 +89,6 @@ export default function useMetamask() {
         const counterpartAddress = (isUser1 ? view.user2 : view.user1).toLowerCase();
         const transactionsOfUser = view.channel.txs.map((tx, idx) => {
           const isSpent = tx.from1 === isUser1;
-          console.log(new Date(Number(tx.createdAt) * 1000), "tx.from1", tx.from1, "isUser1", isUser1);
           return {
             address: counterpartAddress,
             amount: tx.amount,

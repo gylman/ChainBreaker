@@ -46,8 +46,6 @@ export default function Transfer() {
               const form = e.target as HTMLFormElement;
               const formData = new FormData(form);
 
-              console.log(formData);
-
               const other = (formData.get("other[address]") as string).toLowerCase();
               const amountNumber = parseInt(formData.get("amount") as string);
               const tipNumber = parseFloat(formData.get("tip") as string);
