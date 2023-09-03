@@ -23,11 +23,12 @@ import type {
   TypedContractMethod,
 } from "./common";
 
-export declare namespace ChainBreak {
+export declare namespace IChainBreak {
   export type TxStruct = {
     amount: BigNumberish;
     description: string;
     createdAt: BigNumberish;
+    dueDate: BigNumberish;
     from1: boolean;
     status: BigNumberish;
     txType: BigNumberish;
@@ -37,6 +38,7 @@ export declare namespace ChainBreak {
     amount: bigint,
     description: string,
     createdAt: bigint,
+    dueDate: bigint,
     from1: boolean,
     status: bigint,
     txType: bigint
@@ -44,6 +46,7 @@ export declare namespace ChainBreak {
     amount: bigint;
     description: string;
     createdAt: bigint;
+    dueDate: bigint;
     from1: boolean;
     status: bigint;
     txType: bigint;
@@ -53,50 +56,64 @@ export declare namespace ChainBreak {
     balance1: BigNumberish;
     balance2: BigNumberish;
     fees: BigNumberish;
-    txs: ChainBreak.TxStruct[];
+    txs: IChainBreak.TxStruct[];
   };
 
   export type ChannelStructOutput = [
     balance1: bigint,
     balance2: bigint,
     fees: bigint,
-    txs: ChainBreak.TxStructOutput[]
+    txs: IChainBreak.TxStructOutput[]
   ] & {
     balance1: bigint;
     balance2: bigint;
     fees: bigint;
-    txs: ChainBreak.TxStructOutput[];
+    txs: IChainBreak.TxStructOutput[];
   };
 
   export type ChannelViewStruct = {
     user1: AddressLike;
     user2: AddressLike;
-    channel: ChainBreak.ChannelStruct;
+    channel: IChainBreak.ChannelStruct;
   };
 
   export type ChannelViewStructOutput = [
     user1: string,
     user2: string,
-    channel: ChainBreak.ChannelStructOutput
-  ] & { user1: string; user2: string; channel: ChainBreak.ChannelStructOutput };
+    channel: IChainBreak.ChannelStructOutput
+  ] & {
+    user1: string;
+    user2: string;
+    channel: IChainBreak.ChannelStructOutput;
+  };
+
+  export type UserViewStruct = {
+    user: AddressLike;
+    views: IChainBreak.ChannelViewStruct[];
+  };
+
+  export type UserViewStructOutput = [
+    user: string,
+    views: IChainBreak.ChannelViewStructOutput[]
+  ] & { user: string; views: IChainBreak.ChannelViewStructOutput[] };
 
   export type TxViewStruct = {
     user1: AddressLike;
     user2: AddressLike;
     idx: BigNumberish;
-    tx: ChainBreak.TxStruct;
+    tx: IChainBreak.TxStruct;
   };
 
   export type TxViewStructOutput = [
     user1: string,
     user2: string,
     idx: bigint,
-    tx: ChainBreak.TxStructOutput
+    tx: IChainBreak.TxStructOutput
   ] & {
     user1: string;
     user2: string;
     idx: bigint;
-    tx: ChainBreak.TxStructOutput;
+    tx: IChainBreak.TxStructOutput;
   };
 }
 
@@ -105,15 +122,20 @@ export interface ChainBreakInterface extends Interface {
     nameOrSignature:
       | "allUsers"
       | "breakDebtCircuit"
+      | "cbNFT"
       | "channelFor"
       | "confirmTx"
       | "createTx"
+      | "getAllData"
       | "getAllUserChannels"
+      | "getMinAmount"
       | "getPendingTxs"
       | "getTx"
       | "getUserContacts"
+      | "isDebtCircuit"
       | "rejectTx"
       | "sort"
+      | "tryFindDebtCircuit"
   ): FunctionFragment;
 
   getEvent(
@@ -128,6 +150,7 @@ export interface ChainBreakInterface extends Interface {
     functionFragment: "breakDebtCircuit",
     values: [AddressLike[], BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "cbNFT", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "channelFor",
     values: [AddressLike, AddressLike]
@@ -138,11 +161,19 @@ export interface ChainBreakInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "createTx",
-    values: [AddressLike, BigNumberish, string, boolean]
+    values: [AddressLike, BigNumberish, string, boolean, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getAllData",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getAllUserChannels",
     values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getMinAmount",
+    values: [AddressLike, AddressLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getPendingTxs",
@@ -157,6 +188,10 @@ export interface ChainBreakInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "isDebtCircuit",
+    values: [AddressLike[], BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "rejectTx",
     values: [AddressLike, BigNumberish]
   ): string;
@@ -164,17 +199,27 @@ export interface ChainBreakInterface extends Interface {
     functionFragment: "sort",
     values: [AddressLike, AddressLike]
   ): string;
+  encodeFunctionData(
+    functionFragment: "tryFindDebtCircuit",
+    values?: undefined
+  ): string;
 
   decodeFunctionResult(functionFragment: "allUsers", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "breakDebtCircuit",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "cbNFT", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "channelFor", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "confirmTx", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "createTx", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getAllData", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getAllUserChannels",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getMinAmount",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -186,27 +231,35 @@ export interface ChainBreakInterface extends Interface {
     functionFragment: "getUserContacts",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "isDebtCircuit",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "rejectTx", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "sort", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "tryFindDebtCircuit",
+    data: BytesLike
+  ): Result;
 }
 
 export namespace TransactionEvent {
   export type InputTuple = [
     user1: AddressLike,
     user2: AddressLike,
-    transaction: ChainBreak.TxStruct,
+    transaction: IChainBreak.TxStruct,
     idx: BigNumberish
   ];
   export type OutputTuple = [
     user1: string,
     user2: string,
-    transaction: ChainBreak.TxStructOutput,
+    transaction: IChainBreak.TxStructOutput,
     idx: bigint
   ];
   export interface OutputObject {
     user1: string;
     user2: string;
-    transaction: ChainBreak.TxStructOutput;
+    transaction: IChainBreak.TxStructOutput;
     idx: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -219,19 +272,19 @@ export namespace TransactionConfirmedEvent {
   export type InputTuple = [
     user1: AddressLike,
     user2: AddressLike,
-    transaction: ChainBreak.TxStruct,
+    transaction: IChainBreak.TxStruct,
     idx: BigNumberish
   ];
   export type OutputTuple = [
     user1: string,
     user2: string,
-    transaction: ChainBreak.TxStructOutput,
+    transaction: IChainBreak.TxStructOutput,
     idx: bigint
   ];
   export interface OutputObject {
     user1: string;
     user2: string;
-    transaction: ChainBreak.TxStructOutput;
+    transaction: IChainBreak.TxStructOutput;
     idx: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -244,19 +297,19 @@ export namespace TransactionRejectedEvent {
   export type InputTuple = [
     user1: AddressLike,
     user2: AddressLike,
-    transaction: ChainBreak.TxStruct,
+    transaction: IChainBreak.TxStruct,
     idx: BigNumberish
   ];
   export type OutputTuple = [
     user1: string,
     user2: string,
-    transaction: ChainBreak.TxStructOutput,
+    transaction: IChainBreak.TxStructOutput,
     idx: bigint
   ];
   export interface OutputObject {
     user1: string;
     user2: string;
-    transaction: ChainBreak.TxStructOutput;
+    transaction: IChainBreak.TxStructOutput;
     idx: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -316,10 +369,12 @@ export interface ChainBreak extends BaseContract {
     "nonpayable"
   >;
 
+  cbNFT: TypedContractMethod<[], [string], "view">;
+
   channelFor: TypedContractMethod<
     [addr1: AddressLike, addr2: AddressLike],
     [
-      [string, string, ChainBreak.ChannelStructOutput] & {
+      [string, string, IChainBreak.ChannelStructOutput] & {
         user1: string;
         user2: string;
       }
@@ -338,31 +393,50 @@ export interface ChainBreak extends BaseContract {
       user: AddressLike,
       amount: BigNumberish,
       description: string,
-      send: boolean
+      send: boolean,
+      dueDate: BigNumberish
     ],
     [void],
     "payable"
   >;
 
+  getAllData: TypedContractMethod<
+    [],
+    [IChainBreak.UserViewStructOutput[]],
+    "view"
+  >;
+
   getAllUserChannels: TypedContractMethod<
     [user: AddressLike],
-    [ChainBreak.ChannelViewStructOutput[]],
+    [IChainBreak.ChannelViewStructOutput[]],
+    "view"
+  >;
+
+  getMinAmount: TypedContractMethod<
+    [user1: AddressLike, user2: AddressLike, user3: AddressLike],
+    [bigint],
     "view"
   >;
 
   getPendingTxs: TypedContractMethod<
     [user: AddressLike],
-    [ChainBreak.TxViewStructOutput[]],
+    [IChainBreak.TxViewStructOutput[]],
     "view"
   >;
 
   getTx: TypedContractMethod<
     [user1: AddressLike, user2: AddressLike, idx: BigNumberish],
-    [ChainBreak.TxStructOutput],
+    [IChainBreak.TxStructOutput],
     "view"
   >;
 
   getUserContacts: TypedContractMethod<[user: AddressLike], [string[]], "view">;
+
+  isDebtCircuit: TypedContractMethod<
+    [users: AddressLike[], amount: BigNumberish],
+    [boolean],
+    "view"
+  >;
 
   rejectTx: TypedContractMethod<
     [user: AddressLike, idx: BigNumberish],
@@ -375,6 +449,8 @@ export interface ChainBreak extends BaseContract {
     [[string, string]],
     "view"
   >;
+
+  tryFindDebtCircuit: TypedContractMethod<[], [[string[], bigint]], "view">;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
@@ -391,11 +467,14 @@ export interface ChainBreak extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "cbNFT"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
     nameOrSignature: "channelFor"
   ): TypedContractMethod<
     [addr1: AddressLike, addr2: AddressLike],
     [
-      [string, string, ChainBreak.ChannelStructOutput] & {
+      [string, string, IChainBreak.ChannelStructOutput] & {
         user1: string;
         user2: string;
       }
@@ -416,35 +495,53 @@ export interface ChainBreak extends BaseContract {
       user: AddressLike,
       amount: BigNumberish,
       description: string,
-      send: boolean
+      send: boolean,
+      dueDate: BigNumberish
     ],
     [void],
     "payable"
   >;
   getFunction(
+    nameOrSignature: "getAllData"
+  ): TypedContractMethod<[], [IChainBreak.UserViewStructOutput[]], "view">;
+  getFunction(
     nameOrSignature: "getAllUserChannels"
   ): TypedContractMethod<
     [user: AddressLike],
-    [ChainBreak.ChannelViewStructOutput[]],
+    [IChainBreak.ChannelViewStructOutput[]],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getMinAmount"
+  ): TypedContractMethod<
+    [user1: AddressLike, user2: AddressLike, user3: AddressLike],
+    [bigint],
     "view"
   >;
   getFunction(
     nameOrSignature: "getPendingTxs"
   ): TypedContractMethod<
     [user: AddressLike],
-    [ChainBreak.TxViewStructOutput[]],
+    [IChainBreak.TxViewStructOutput[]],
     "view"
   >;
   getFunction(
     nameOrSignature: "getTx"
   ): TypedContractMethod<
     [user1: AddressLike, user2: AddressLike, idx: BigNumberish],
-    [ChainBreak.TxStructOutput],
+    [IChainBreak.TxStructOutput],
     "view"
   >;
   getFunction(
     nameOrSignature: "getUserContacts"
   ): TypedContractMethod<[user: AddressLike], [string[]], "view">;
+  getFunction(
+    nameOrSignature: "isDebtCircuit"
+  ): TypedContractMethod<
+    [users: AddressLike[], amount: BigNumberish],
+    [boolean],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "rejectTx"
   ): TypedContractMethod<
@@ -459,6 +556,9 @@ export interface ChainBreak extends BaseContract {
     [[string, string]],
     "view"
   >;
+  getFunction(
+    nameOrSignature: "tryFindDebtCircuit"
+  ): TypedContractMethod<[], [[string[], bigint]], "view">;
 
   getEvent(
     key: "Transaction"

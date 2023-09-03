@@ -119,7 +119,7 @@ export default function Contacts() {
                 }}
                 className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full data-[state=unchecked]:border-2 data-[state=unchecked]:border-gray-800 data-[state=checked]:bg-gray-800 data-[state=unchecked]:bg-white data-[state=checked]:text-white"
               >
-                <Checkbox.Indicator className="CheckboxIndicator">
+                <Checkbox.Indicator>
                   <IconCheck size={16} />
                 </Checkbox.Indicator>
               </Checkbox.Root>
