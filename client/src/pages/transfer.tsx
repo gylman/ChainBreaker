@@ -1,13 +1,13 @@
 import { useEffect } from "react";
-import { chainBreak, signer, title } from "../../signals";
+import { chainBreak, signer, title } from "../signals";
 import * as Tabs from "@radix-ui/react-tabs";
-import Input from "../../components/Input";
-import Button from "../../components/Button";
-import AddressInput from "../../components/AddressInput";
+import Input from "../components/Input";
+import Button from "../components/Button";
+import AddressInput from "../components/AddressInput";
 import { useAtomValue } from "jotai";
-import { debtClearingAllowedAtom } from "../../states";
-import { showToast } from "../../utils/toast";
-import useMetamask from "../../hooks/useMetamask";
+import { debtClearingAllowedAtom } from "../states";
+import { showToast } from "../utils/toast";
+import useMetamask from "../hooks/useMetamask";
 
 export default function Transfer() {
   const { updateContacts, myAddress } = useMetamask();
@@ -46,24 +46,24 @@ export default function Transfer() {
               const form = e.target as HTMLFormElement;
               const formData = new FormData(form);
 
-              console.log(formData);
-
               const other = (formData.get("other[address]") as string).toLowerCase();
               const amountNumber = parseInt(formData.get("amount") as string);
-              const tipNumber = parseFloat(formData.get("tip") as string);
+              const tipNumber = parseFloat((formData.get("tip") as string | null) ?? "0");
               if (!isFinite(amountNumber) || !isFinite(tipNumber)) return;
               const amount = BigInt(amountNumber);
               const tip = BigInt(tipNumber * 1e18);
               const message = formData.get("message") as string;
+              const dueDateString = formData.get("due-date") as string | null;
+              const dueDateBigint = dueDateString ? BigInt(new Date(dueDateString).getTime() / 1000) : 0;
               const type = formData.get("type") as "receive" | "send";
 
-              const [user1] = await chainBreak.value.sort(myAddress, other);
-              const isUser1 = user1.toLowerCase() === myAddress;
-              const from1 = (type === "send" && isUser1) || (type === "receive" && !isUser1);
+              // const [user1] = await chainBreak.value.sort(myAddress, other);
+              // const isUser1 = user1.toLowerCase() === myAddress;
+              // const from1 = (type === "send" && isUser1) || (type === "receive" && !isUser1);
 
               await chainBreak.value
                 .connect(signer.value)
-                .createTx(other, amount, message, from1, {
+                .createTx(other, amount, message, type === "send", dueDateBigint, {
                   value: tip,
                 })
                 .then((res) => res.wait());
@@ -90,12 +90,12 @@ export default function Transfer() {
                   <div className="absolute left-4 py-2.5">$</div>
                 </div>
               </fieldset>
-              {/* <fieldset className="space-y-1">
+              <fieldset className="space-y-1">
                 <label className="font-semibold text-gray-800" htmlFor="due-date">
-                  Due Date<span className="text-red-500">*</span>
+                  Due Date
                 </label>
-                <Input type="date" id="due-date" name="due-date" defaultValue="" required />
-              </fieldset> */}
+                <Input type="date" id="due-date" name="due-date" defaultValue="" />
+              </fieldset>
               <fieldset className="space-y-1">
                 <label className="font-semibold text-gray-800" htmlFor="message">
                   Message
@@ -140,12 +140,12 @@ export default function Transfer() {
                   <div className="absolute left-4 py-2.5">$</div>
                 </div>
               </fieldset>
-              {/* <fieldset className="space-y-1">
+              <fieldset className="space-y-1">
                 <label className="font-semibold text-gray-800" htmlFor="due-date">
-                  Due Date<span className="text-red-500">*</span>
+                  Due Date
                 </label>
                 <Input type="date" id="due-date" name="due-date" defaultValue="" />
-              </fieldset> */}
+              </fieldset>
               <fieldset className="space-y-1">
                 <label className="font-semibold text-gray-800" htmlFor="message">
                   Message

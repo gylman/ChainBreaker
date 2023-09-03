@@ -5,6 +5,7 @@ import { chainBreak, contacts, signer, transactions, wallet } from "../signals";
 import { formatBalance } from "../utils/metamask";
 import { ChainBreak__factory } from "../abi/types";
 import type { Tx } from "../types";
+import { availableNetworks } from "../constants.ts";
 
 export default function useMetamask() {
   const [provider, setProvider] = useState<ethers.BrowserProvider | undefined>(undefined);
@@ -29,10 +30,19 @@ export default function useMetamask() {
       if (provider) {
         window.ethereum?.on("accountsChanged", refreshAccounts);
         window.ethereum?.on("chainChanged", refreshChain);
+        window.ethereum?.on("chainChanged", updateWallet);
         const provider = new ethers.BrowserProvider(window.ethereum);
         setProvider(provider ?? undefined);
         signer.value = await provider.getSigner();
-        chainBreak.value = ChainBreak__factory.connect(import.meta.env.VITE_CHAINBREAK_ADDRESS, provider);
+        const chainId = await window.ethereum
+          .request({
+            method: "eth_chainId",
+          })
+          .then((res: string) => parseInt(res, 16).toString());
+        chainBreak.value = ChainBreak__factory.connect(
+          availableNetworks.find(({ chainId: networkId }) => chainId === networkId)!.chainBreakAddress,
+          provider,
+        );
       }
     };
 
@@ -69,8 +79,6 @@ export default function useMetamask() {
   const updateContacts = useCallback(() => {
     if (!chainBreak.value || !myAddress) return;
 
-    console.log("Updating contacts");
-
     const chainBreakValue = chainBreak.value;
 
     const getUserContacts = async () => {
@@ -81,7 +89,6 @@ export default function useMetamask() {
         const counterpartAddress = (isUser1 ? view.user2 : view.user1).toLowerCase();
         const transactionsOfUser = view.channel.txs.map((tx, idx) => {
           const isSpent = tx.from1 === isUser1;
-          console.log(new Date(Number(tx.createdAt) * 1000), "tx.from1", tx.from1, "isUser1", isUser1);
           return {
             address: counterpartAddress,
             amount: tx.amount,

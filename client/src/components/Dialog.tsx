@@ -5,7 +5,7 @@ import { cx } from "../utils/common";
 function Content({ children }: PropsWithChildren) {
   return (
     <D.Portal>
-      <D.Overlay className="animate-overlayShow fixed inset-0 bg-black/25" />
+      <D.Overlay className="fixed inset-0 animate-overlayShow bg-black/25" />
       <D.Content className="fixed left-1/2 top-1/2 max-h-[83.33%] w-11/12 max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border-2 border-gray-800 bg-white p-5 shadow-[6px_6px_0px_rgb(31_41_55)]">
         {children}
       </D.Content>
@@ -22,6 +22,7 @@ const Dialog = {
   Trigger: D.Trigger,
   Content,
   Title,
+  Close: D.Close,
 };
 
 export default Dialog;

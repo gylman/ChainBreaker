@@ -12,10 +12,13 @@ export default function AddressInput(props: ComboboxProps<Contact, false, false,
   const [query, setQuery] = useState("");
   const [namedContacts] = useAtom(namedContactsAtom);
 
-  const candidates: Contact[] = contacts.value.map(({ address }) => ({
-    address,
-    name: namedContacts.find((nc) => nc.address === address)?.name,
-  }));
+  const candidates: Contact[] = [
+    ...contacts.value.map(({ address }) => ({
+      address,
+      name: namedContacts.find((nc) => nc.address === address)?.name,
+    })),
+    ...namedContacts.filter((nc) => !contacts.value.some((c) => c.address === nc.address)),
+  ];
 
   const isQueryAddress = query.startsWith("0x") && query.slice(2).match(/^[0-9a-f]*$/i);
   const filteredContacts =
