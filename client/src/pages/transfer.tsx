@@ -55,6 +55,8 @@ export default function Transfer() {
               const amount = BigInt(amountNumber);
               const tip = BigInt(tipNumber * 1e18);
               const message = formData.get("message") as string;
+              const dueDate = new Date(formData.get("due-date") as string);
+              const dueDateBigint = BigInt(dueDate.getTime() / 1000);
               const type = formData.get("type") as "receive" | "send";
 
               const [user1] = await chainBreak.value.sort(myAddress, other);
@@ -63,7 +65,7 @@ export default function Transfer() {
 
               await chainBreak.value
                 .connect(signer.value)
-                .createTx(other, amount, message, from1, {
+                .createTx(other, amount, message, from1, dueDateBigint, {
                   value: tip,
                 })
                 .then((res) => res.wait());
@@ -90,12 +92,12 @@ export default function Transfer() {
                   <div className="absolute left-4 py-2.5">$</div>
                 </div>
               </fieldset>
-              {/* <fieldset className="space-y-1">
+              <fieldset className="space-y-1">
                 <label className="font-semibold text-gray-800" htmlFor="due-date">
                   Due Date<span className="text-red-500">*</span>
                 </label>
                 <Input type="date" id="due-date" name="due-date" defaultValue="" required />
-              </fieldset> */}
+              </fieldset>
               <fieldset className="space-y-1">
                 <label className="font-semibold text-gray-800" htmlFor="message">
                   Message
@@ -140,12 +142,12 @@ export default function Transfer() {
                   <div className="absolute left-4 py-2.5">$</div>
                 </div>
               </fieldset>
-              {/* <fieldset className="space-y-1">
+              <fieldset className="space-y-1">
                 <label className="font-semibold text-gray-800" htmlFor="due-date">
                   Due Date<span className="text-red-500">*</span>
                 </label>
                 <Input type="date" id="due-date" name="due-date" defaultValue="" />
-              </fieldset> */}
+              </fieldset>
               <fieldset className="space-y-1">
                 <label className="font-semibold text-gray-800" htmlFor="message">
                   Message
