@@ -36,7 +36,7 @@ export default function History() {
         </Tabs.Trigger>
       </Tabs.List>
       <main className="h-[calc(100%-126px)] overflow-y-auto overscroll-y-none">
-        <Tabs.Content className="relative min-h-full space-y-6 p-6 pb-[10rem]" value="all">
+        <Tabs.Content className="min-h-full space-y-6 p-6 pb-[10rem]" value="all">
           <ul className="flex flex-col-reverse gap-2">
             {transactions.value.map((tx) => (
               <Item key={`${tx.address}:${tx.idx}`} tx={tx} />
