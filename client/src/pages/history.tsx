@@ -36,7 +36,7 @@ export default function History() {
         </Tabs.Trigger>
       </Tabs.List>
       <main className="h-[calc(100%-126px)] overflow-y-auto overscroll-y-none">
-        <Tabs.Content className="relative min-h-full space-y-6 p-6 pb-[10rem]" value="all">
+        <Tabs.Content className="min-h-full space-y-6 p-6 pb-[10rem]" value="all">
           <ul className="flex flex-col-reverse gap-2">
             {transactions.value.map((tx) => (
               <Item key={`${tx.address}:${tx.idx}`} tx={tx} />
@@ -52,23 +52,6 @@ export default function History() {
         <Tabs.Content className="min-h-full space-y-6 p-6 pb-[10rem]" value="withdrawals">
           <ul className="flex flex-col-reverse gap-2">
             {transactions.value
-              .filter((tx) => !tx.isSpent)
-              .map((tx) => (
-                <Item key={`${tx.address}:${tx.idx}`} tx={tx} />
-              ))}
-          </ul>
-          <div className="absolute bottom-[5.5rem] left-1/2 w-11/12 max-w-md -translate-x-1/2 rounded-2xl border-2 border-gray-800 bg-white px-5 py-3 shadow-[6px_6px_0px_rgb(31_41_55)]">
-            {(() => {
-              const total = transactions.value
-                .filter((tx) => !tx.isSpent)
-                .reduce((acc, tx) => acc + Number(tx.amount), 0);
-              return `You owe \$${total}.`;
-            })()}
-          </div>
-        </Tabs.Content>
-        <Tabs.Content className="min-h-full space-y-6 p-6 pb-[10rem]" value="deposits">
-          <ul className="flex flex-col-reverse gap-2">
-            {transactions.value
               .filter((tx) => tx.isSpent)
               .map((tx) => (
                 <Item key={`${tx.address}:${tx.idx}`} tx={tx} />
@@ -80,6 +63,23 @@ export default function History() {
                 .filter((tx) => tx.isSpent)
                 .reduce((acc, tx) => acc + Number(tx.amount), 0);
               return `You lent \$${total}.`;
+            })()}
+          </div>
+        </Tabs.Content>
+        <Tabs.Content className="min-h-full space-y-6 p-6 pb-[10rem]" value="deposits">
+          <ul className="flex flex-col-reverse gap-2">
+            {transactions.value
+              .filter((tx) => !tx.isSpent)
+              .map((tx) => (
+                <Item key={`${tx.address}:${tx.idx}`} tx={tx} />
+              ))}
+          </ul>
+          <div className="absolute bottom-[5.5rem] left-1/2 w-11/12 max-w-md -translate-x-1/2 rounded-2xl border-2 border-gray-800 bg-white px-5 py-3 shadow-[6px_6px_0px_rgb(31_41_55)]">
+            {(() => {
+              const total = transactions.value
+                .filter((tx) => !tx.isSpent)
+                .reduce((acc, tx) => acc + Number(tx.amount), 0);
+              return `You owe \$${total}.`;
             })()}
           </div>
         </Tabs.Content>
