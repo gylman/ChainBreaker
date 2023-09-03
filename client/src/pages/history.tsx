@@ -97,7 +97,7 @@ function Item({ tx }: { tx: Tx }) {
       key={tx.address}
       className={cx(
         "justify-between rounded-xl border-2 border-gray-800 px-4 py-2",
-        !tx.isSpent ? "bg-lime-100" : "bg-red-100",
+        tx.status.startsWith("pending") ? "bg-orange-100" : !tx.isSpent ? "bg-lime-100" : "bg-red-100",
       )}
     >
       {/* name */}
