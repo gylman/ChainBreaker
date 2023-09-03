@@ -17,7 +17,9 @@ export default function PendingTransaction() {
       <Dialog.Content>
         {firstPendingTransaction && (
           <>
-            <Dialog.Title className="mb-1">Have You Received?</Dialog.Title>
+            <Dialog.Title className="mb-1">
+              Have You {firstPendingTransaction.isSpent ? "Sent" : "Received"}?
+            </Dialog.Title>
 
             <div className="space-y-2">
               <fieldset className="space-y-0.5">
