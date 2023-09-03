@@ -48,7 +48,7 @@ export default function Transfer() {
 
               const other = (formData.get("other[address]") as string).toLowerCase();
               const amountNumber = parseInt(formData.get("amount") as string);
-              const tipNumber = parseFloat(formData.get("tip") as string);
+              const tipNumber = parseFloat((formData.get("tip") as string | null) ?? "0");
               if (!isFinite(amountNumber) || !isFinite(tipNumber)) return;
               const amount = BigInt(amountNumber);
               const tip = BigInt(tipNumber * 1e18);
