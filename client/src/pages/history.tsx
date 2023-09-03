@@ -62,7 +62,7 @@ export default function History() {
               const total = transactions.value
                 .filter((tx) => !tx.isSpent)
                 .reduce((acc, tx) => acc + Number(tx.amount), 0);
-              return `You owe \$${total}.`;
+              return `You lent \$${total}.`;
             })()}
           </div>
         </Tabs.Content>
@@ -79,7 +79,7 @@ export default function History() {
               const total = transactions.value
                 .filter((tx) => tx.isSpent)
                 .reduce((acc, tx) => acc + Number(tx.amount), 0);
-              return `You lent \$${total}.`;
+              return `You owe \$${total}.`;
             })()}
           </div>
         </Tabs.Content>
