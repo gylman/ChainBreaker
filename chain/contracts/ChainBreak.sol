@@ -231,23 +231,27 @@ contract ChainBreak is IChainBreak {
             [0, 3, 2, 1, 0]
         ];
 
-        for (uint i = 0; i < indices1.length; i++) {
-            int amount = getMinAmount(_users[indices1[i][0]],_users[indices1[i][1]],_users[indices1[i][2]]);
-            address[] memory users = new address[](4);
-            (users[0], users[1], users[2], users[3]) = (_users[indices1[i][0]],_users[indices1[i][1]],_users[indices1[i][2]], _users[indices1[i][3]]);
-            bool correct = isDebtCircuit(users, amount);
-            if (correct) return (users, amount);
+        if (_users.length >= 3) {
+            for (uint i = 0; i < indices1.length; i++) {
+                int amount = getMinAmount(_users[indices1[i][0]],_users[indices1[i][1]],_users[indices1[i][2]]);
+                address[] memory users = new address[](4);
+                (users[0], users[1], users[2], users[3]) = (_users[indices1[i][0]],_users[indices1[i][1]],_users[indices1[i][2]], _users[indices1[i][3]]);
+                bool correct = isDebtCircuit(users, amount);
+                if (correct) return (users, amount);
+            }
         }
 
-        for (uint i = 0; i < indices2.length; i++) {
-            int amount1 = getMinAmount(_users[indices2[i][0]],_users[indices2[i][1]],_users[indices2[i][2]]);
-            int amount2 = getMinAmount(_users[indices2[i][1]],_users[indices2[i][2]],_users[indices2[i][3]]);
-            if (amount1 > amount2) amount1 = amount2;
+        if (_users.length >= 4) {
+            for (uint i = 0; i < indices2.length; i++) {
+                int amount1 = getMinAmount(_users[indices2[i][0]],_users[indices2[i][1]],_users[indices2[i][2]]);
+                int amount2 = getMinAmount(_users[indices2[i][1]],_users[indices2[i][2]],_users[indices2[i][3]]);
+                if (amount1 > amount2) amount1 = amount2;
 
-            address[] memory users = new address[](5);
-            (users[0], users[1], users[2], users[3], users[4]) = (_users[indices2[i][0]],_users[indices2[i][1]],_users[indices2[i][2]], _users[indices2[i][3]], _users[indices2[i][4]]);
-            bool correct = isDebtCircuit(users, amount1);
-            if (correct) return (users, amount1);
+                address[] memory users = new address[](5);
+                (users[0], users[1], users[2], users[3], users[4]) = (_users[indices2[i][0]],_users[indices2[i][1]],_users[indices2[i][2]], _users[indices2[i][3]], _users[indices2[i][4]]);
+                bool correct = isDebtCircuit(users, amount1);
+                if (correct) return (users, amount1);
+            }
         }
     }
 
