@@ -45,7 +45,7 @@ export default function History() {
           <div className="absolute bottom-[5.5rem] left-1/2 w-11/12 max-w-md -translate-x-1/2 rounded-2xl border-2 border-gray-800 bg-white px-5 py-3 shadow-[6px_6px_0px_rgb(31_41_55)]">
             {(() => {
               const total = transactions.value.reduce((acc, tx) => acc + Number(tx.amount) * (tx.isSpent ? -1 : 1), 0);
-              return `You ${total >= 0 ? "owe" : "lent"} \$${Math.abs(total)}.`;
+              return `You ${total >= 0 ? "lent" : "owe"} \$${Math.abs(total)}.`;
             })()}
           </div>
         </Tabs.Content>
@@ -97,7 +97,7 @@ function Item({ tx }: { tx: Tx }) {
       key={tx.address}
       className={cx(
         "justify-between rounded-xl border-2 border-gray-800 px-4 py-2",
-        tx.status.startsWith("pending") ? "bg-orange-100" : !tx.isSpent ? "bg-lime-100" : "bg-red-100",
+        tx.status.startsWith("pending") ? "bg-orange-100" : !tx.isSpent ? "bg-red-100" : "bg-lime-100",
       )}
     >
       {/* name */}

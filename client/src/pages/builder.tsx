@@ -15,10 +15,17 @@ export default function Builder() {
           onClick={async () => {
             if (!chainBreak.value || !signer.value) return;
 
-            const debtCircuitResponse = await chainBreak.value.tryFindDebtCircuit();
             await chainBreak.value
               .connect(signer.value)
-              .breakDebtCircuit(...debtCircuitResponse)
+              .breakDebtCircuit(
+                [
+                  "0x197216E3421D13A72Fdd79A44d8d89f121dcab6C",
+                  "0x1450FE54AdF040f12c8202ba0b112BE9f5d2D7e0",
+                  "0xDaFD7e67664A118Fb2F7F130AE6E58A7588798cA",
+                  "0x197216E3421D13A72Fdd79A44d8d89f121dcab6C",
+                ],
+                "1",
+              )
               .then((res) => res.wait());
 
             showToast("Done!");
